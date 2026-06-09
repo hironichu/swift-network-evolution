@@ -244,15 +244,15 @@ public struct PathProperties: CustomStringConvertible {
         static public let fallbackIsOpportunistic = Flags(rawValue: 1 << 33)
     }
 
-    /// Represents the link quality measurement of the link layer network attachment
+    /// The link-quality measurement of the link-layer network attachment.
     public enum LinkQuality: Sendable {
-        /// No link quality measurement is available
+        /// No link-quality measurement is available.
         case unknown
-        /// Link quality is bad
+        /// The link quality is minimal.
         case minimal
-        /// Link quality is moderate
+        /// The link quality is moderate.
         case moderate
-        /// Link quality is good
+        /// The link quality is good.
         case good
 
         internal init(_ nw: Int8) {

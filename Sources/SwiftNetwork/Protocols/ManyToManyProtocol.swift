@@ -21,8 +21,10 @@ internal import os
 
 // MARK: - Many-to-Many Protocol Adoption
 
-/// Many-to-many protocols have associated types for flows (that connect to upper protocols)
-/// and paths (that connect to lower protocols)
+/// A protocol that handles multiple flows over multiple paths.
+///
+/// Many-to-many protocols have associated types for flows that connect to upper protocols
+/// and paths that connect to lower protocols.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol ManyToManyProtocolHandler: ListenerHandler, LoggableProtocol {
@@ -34,7 +36,7 @@ public protocol ManyToManyProtocolHandler: ListenerHandler, LoggableProtocol {
     var multiplexedFlows: [MultiplexedFlowIdentifier: Flow] { get set }
     var multiplexingPaths: [MultiplexingPathIdentifier: Path] { get set }
 
-    /// Connection-wide calls to implement
+    // MARK: Connection-wide calls to implement
     func setup(
         remote: Endpoint?,
         local: Endpoint?,
@@ -46,7 +48,7 @@ public protocol ManyToManyProtocolHandler: ListenerHandler, LoggableProtocol {
     func teardown()
     func handleApplicationEvent(_ event: ApplicationEvent) -> HandleNetworkEventResult
 
-    /// Per-flow calls to implement
+    // MARK: Per-flow calls to implement
     func setup(
         flow: MultiplexedFlowIdentifier,
         remote: Endpoint?,
@@ -60,7 +62,7 @@ public protocol ManyToManyProtocolHandler: ListenerHandler, LoggableProtocol {
     func handleApplicationEvent(flow: MultiplexedFlowIdentifier, event: ApplicationEvent) -> HandleNetworkEventResult
     func getMetadata<P>(flow: MultiplexedFlowIdentifier) -> ProtocolMetadata<P>? where P: NetworkProtocol
 
-    /// Per-path events to implement
+    // MARK: Per-path events to implement
     func handleConnectedEvent(path: MultiplexingPathIdentifier)
     func handleDisconnectedEvent(path: MultiplexingPathIdentifier, error: NetworkError?)
     func handlePathChanged(path pathID: MultiplexingPathIdentifier, event: MultiplexingPathEvent, isPrimary: Bool)
@@ -79,7 +81,7 @@ public protocol ManyToManyProtocolHandler: ListenerHandler, LoggableProtocol {
     ) throws(NetworkError)
     #endif
 
-    /// Helper functions implemented by inheriting either HomogeneousManyToManyProtocolHandler or HeterogenousManyToManyProtocolHandler
+    // MARK: Helper functions implemented by inheriting either HomogeneousManyToManyProtocolHandler or HeterogeneousManyToManyProtocolHandler
     mutating func performInitialSetupIfNeeded(
         remote: Endpoint?,
         local: Endpoint?,
@@ -93,18 +95,16 @@ public protocol ManyToManyProtocolHandler: ListenerHandler, LoggableProtocol {
     mutating func teardownIfPossible()
 }
 
-/// `HomogeneousManyToManyProtocolHandler` declares that a many-to-many protocol only supports a single
-/// type of flow
+/// Declares that a many-to-many protocol supports only a single type of flow.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol HomogeneousManyToManyProtocolHandler: ManyToManyProtocolHandler {
 }
 
-/// `HeterogenousManyToManyProtocolHandler` allows a many-to-many protocol support a secondary
-/// type of flow (such as to handle both stream flows and datagram flows)
+/// Allows a many-to-many protocol to support a secondary type of flow, for example, both stream flows and datagram flows.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
-public protocol HeterogenousManyToManyProtocolHandler: HeterogenousListenerHandler, ManyToManyProtocolHandler {
+public protocol HeterogeneousManyToManyProtocolHandler: HeterogeneousListenerHandler, ManyToManyProtocolHandler {
     associatedtype SecondaryFlow: MultiplexedFlow
     var multiplexedSecondaryFlows: [MultiplexedFlowIdentifier: SecondaryFlow] { get set }
     var secondaryInboundFlowLinkage: SecondaryUpperProtocol { get set }
@@ -598,7 +598,7 @@ extension HomogeneousManyToManyProtocolHandler {
     #endif
 }
 
-extension HeterogenousManyToManyProtocolHandler {
+extension HeterogeneousManyToManyProtocolHandler {
     fileprivate var hasNoUpperLinkages: Bool {
         multiplexedFlows.isEmpty && multiplexedSecondaryFlows.isEmpty && inboundFlowLinkage.isDetached
     }
@@ -634,7 +634,7 @@ extension HeterogenousManyToManyProtocolHandler {
     }
 }
 
-extension HeterogenousManyToManyProtocolHandler {
+extension HeterogeneousManyToManyProtocolHandler {
     var asSecondaryListener: SecondaryUpperProtocol.PairedLinkage { .init(reference: reference) }
 
     public mutating func performInitialSetupIfNeeded(
@@ -1063,7 +1063,7 @@ extension ManyToManyDatapathProtocol where Flow.ParentProtocol == Self, Flow: Ou
     }
 }
 
-extension HeterogenousManyToManyProtocolHandler
+extension HeterogeneousManyToManyProtocolHandler
 where SecondaryFlow.ParentProtocol == Self, SecondaryFlow: OutboundDatagramHandler {
     public mutating func attachNewDatagramFlowProtocol(
         _ from: ProtocolInstanceReference,
@@ -1247,7 +1247,7 @@ extension MultiplexedFlow {
     #endif
 }
 
-extension MultiplexedFlow where ParentProtocol: HeterogenousManyToManyProtocolHandler {
+extension MultiplexedFlow where ParentProtocol: HeterogeneousManyToManyProtocolHandler {
     public mutating func detach(_ from: ProtocolInstanceReference) throws(NetworkError) {
         do { try validate(upper: from, #function) } catch { throw NetworkError.posix(EINVAL) }
         parentProtocol.teardown(flow: identifier)
@@ -1527,7 +1527,7 @@ extension ManyToManyApplicationDatagramProtocol where Flow: AutomaticUpperDatagr
     }
 }
 
-extension HeterogenousManyToManyProtocolHandler where SecondaryFlow: AutomaticUpperDatagramProcessing {
+extension HeterogeneousManyToManyProtocolHandler where SecondaryFlow: AutomaticUpperDatagramProcessing {
     public func accessDatagramsToSend(flow flowID: MultiplexedFlowIdentifier, _ body: (inout FrameArray) -> Void) {
         guard var flow = self.secondaryFlow(for: flowID) else { return }
         body(&flow.upperSendQueue)
@@ -1792,7 +1792,7 @@ extension ManyToManyProtocolHandler {
     }
 }
 
-extension HeterogenousManyToManyProtocolHandler {
+extension HeterogeneousManyToManyProtocolHandler {
     public func deliverConnectedEvent(flow flowID: MultiplexedFlowIdentifier) {
         switch flowID {
         case .allFlows:

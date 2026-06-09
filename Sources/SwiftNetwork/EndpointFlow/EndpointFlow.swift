@@ -30,21 +30,21 @@ internal import Synchronization
 
 final class EndpointFlow: CustomDebugStringConvertible {
 
-    /// Datapath logging
+    /// The data path logging state.
     public var log = NetworkLoggerState()
 
     enum State: Equatable, Sendable {
-        /// The initial state prior to start
+        /// The initial state prior to start.
         case setup
-        /// Waiting connections have not yet been started, or do not have a viable network
+        /// Waiting connections haven't yet been started, or don't have a viable network.
         case waiting(NetworkError)
-        /// Preparing connections are actively establishing the connection
+        /// Preparing connections are actively establishing the connection.
         case preparing
-        /// Ready connections can send and receive data
+        /// Ready connections can send and receive data.
         case ready
-        /// Failed connections are disconnected and can no longer send or receive data
+        /// Failed connections are disconnected and can no longer send or receive data.
         case failed(NetworkError)
-        /// Cancelled connections have been invalidated by the client and will send no more events
+        /// Canceled connections have been invalidated by the client and send no more events.
         case cancelled
 
         public static func == (lhs: State, rhs: State) -> Bool {

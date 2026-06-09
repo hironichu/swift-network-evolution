@@ -365,7 +365,7 @@ public struct InPlaceSerializer<Factory: SerializerSpanFactory & ~Copyable & ~Es
     private var previousSpanAggregateByteCount = 0
     private var internalResult: SerializationResult = .success
 
-    /// Extract the factory from the serializer, consuming it in the process.
+    /// Extracts the factory from the serializer, consuming the serializer in the process.
     @_lifetime(copy self)
     consuming func takeFactory() -> Factory {
         factory
@@ -379,9 +379,9 @@ public struct InPlaceSerializer<Factory: SerializerSpanFactory & ~Copyable & ~Es
         self.refill()
     }
 
-    /// Refill the serializer with the next span from the factory.
-    /// Resets the cursor and internal result so serialization can continue.
-    /// Returns `false` if the factory has no more spans available.
+    /// Refills the serializer with the next span from the factory, and resets the cursor and internal result so serialization can continue.
+    ///
+    /// - Returns: A Boolean value that indicates whether the factory had another span available; returns `false` when no more spans remain.
     @discardableResult
     mutating func refill() -> Bool {
         guard let span = factory.nextMutableSpan() else {
@@ -431,8 +431,9 @@ public struct InPlaceSerializer<Factory: SerializerSpanFactory & ~Copyable & ~Es
         cursor &+= amount
     }
 
-    /// Write a fixed-size value, using the fast path when the current span
-    /// has enough room, or falling back to writeFragmented.
+    /// Writes a fixed-size value, choosing the fast or fragmented path.
+    ///
+    /// Uses the fast path when the current span has enough room, or falls back to `writeFragmented(_:)`.
     private mutating func writeFixedSize<T: BitwiseCopyable>(_ value: T) throws(SerializationError) {
         let length = MemoryLayout<T>.size
         guard hasRoom(length) else {
@@ -444,7 +445,7 @@ public struct InPlaceSerializer<Factory: SerializerSpanFactory & ~Copyable & ~Es
         try moveCursor(length)
     }
 
-    /// Write a fixed-size value across span boundaries.
+    /// Writes a fixed-size value across span boundaries.
     private mutating func writeFragmented<T: BitwiseCopyable>(_ value: T) throws(SerializationError) {
         let length = MemoryLayout<T>.size
         precondition(length <= 16)
@@ -634,7 +635,7 @@ public struct FrameSerializer: ~Copyable {
         }
     }
 
-    /// Extract the frame array from the serializer, consuming it in the process.
+    /// Extracts the frame array from the serializer, consuming the serializer in the process.
     fileprivate consuming func extractFrames() -> FrameArray {
         convertBufferToFrame()
         return frameArray
@@ -675,7 +676,7 @@ public struct FrameSerializer: ~Copyable {
         self.capacity = capacity
     }
 
-    /// Write a fixed-size value into an output span
+    /// Writes a fixed-size value into an output span.
     private mutating func writeFixedSize<T: BitwiseCopyable>(_ value: T) {
         withOutputSpan(length: MemoryLayout<T>.size) { outputSpan in
             outputSpan.append(value, as: T.self)

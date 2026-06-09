@@ -36,7 +36,7 @@ public struct EthernetAddress: Hashable, CustomDebugStringConvertible {
         }
     }
 
-    /// An IPv6 address as a byte array
+    /// An Ethernet address as a byte array.
     public init?(_ bytes: [UInt8]) {
         guard bytes.count == MemoryLayout<EthernetAddressStorage>.size else {
             return nil

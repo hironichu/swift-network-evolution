@@ -14,55 +14,65 @@
 
 // MARK: Automatic Datagram Processing
 
-/// Add conformance to `AutomaticLowerDatagramProcessing` to automatically send and receive datagrams
-/// from lower protocols.
+/// A protocol for automatically sending and receiving datagrams with lower protocols.
+///
+/// Add conformance to `AutomaticLowerDatagramProcessing` to automatically send and receive
+/// datagrams from lower protocols.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol AutomaticLowerDatagramProcessing: ~Copyable, InboundDatagramHandler {
     var lower: LowerProtocol { get set }
 
-    /// A queue of datagrams that will be sent to the lower protocol.
-    /// NOTE: Protocols generally do not need to access this directly.
+    /// A queue of datagrams the framework sends to the lower protocol.
+    ///
+    /// Protocols generally don't need to access this directly.
     /// Instead, call `addToLowerSendQueue`.
     var lowerSendQueue: FrameArray { get set }
 
     /// A queue of datagrams that have been received from the lower protocol.
-    /// NOTE: Protocols should access frames from this queue in response
+    ///
+    /// Protocols should access frames from this queue in response
     /// to the `serviceLowerReceiveQueue` call.
     var lowerReceiveQueue: FrameArray { get set }
 
-    /// A function called when the lower protocol has added datagrams to
+    /// A function the framework calls when the lower protocol has added datagrams to
     /// `lowerReceiveQueue`.
-    /// NOTE: Protocols should implement this function to customize behavior
+    ///
+    /// Protocols should implement this function to customize behavior.
     func serviceLowerReceiveQueue()
 
-    /// A function called when there is outbound room available
-    /// NOTE: Protocols should implement this function to customize behavior
+    /// A function the framework calls when outbound room becomes available.
+    ///
+    /// Protocols should implement this function to customize behavior.
     func handleOutboundRoomAvailable()
 }
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 extension AutomaticLowerDatagramProcessing where Self: ~Copyable {
-    /// A function to call to add datagrams to `lowerSendQueue`
+    /// Adds datagrams to the lower send queue.
+    ///
+    /// Appends frames to `lowerSendQueue`.
     public mutating func addToLowerSendQueue(_ datagrams: consuming FrameArray) throws(NetworkError) {
         lowerSendQueue.add(frames: datagrams)
     }
 
-    /// A function to call to indicate to the lower protocol that datagrams
-    /// have been added to the `lowerSendQueue`.
+    /// Indicates to the lower protocol that datagrams have been added to the send queue.
+    ///
+    /// Drains `lowerSendQueue` to the lower protocol.
     public mutating func serviceLowerSendQueue() {
         guard !lowerSendQueue.isEmpty else { return }
         try? lower.invokeSendDatagrams(reference, datagrams: lowerSendQueue.drainArray())
     }
 
-    /// A function to call to indicate that datagrams should be read
-    /// from the lower protocol.
+    /// Indicates that datagrams should be read from the lower protocol.
     public mutating func resumeReadingInboundDatagrams() {
         _readInboundDatagrams()
     }
 }
 
+/// A protocol for automatically processing datagrams from upper protocols.
+///
 /// Add conformance to `AutomaticUpperDatagramProcessing` to automatically process datagrams
 /// from upper protocols.
 @_spi(ProtocolProvider)
@@ -71,25 +81,26 @@ public protocol AutomaticUpperDatagramProcessing: ~Copyable, OutboundDatagramHan
     var upper: UpperProtocol { get set }
 
     /// A queue of datagrams that have been sent by the upper protocol.
-    /// NOTE: Protocols should access frames from this queue in response
+    ///
+    /// Protocols should access frames from this queue in response
     /// to the `serviceUpperSendQueue` call.
     var upperSendQueue: FrameArray { get set }
 
-    /// A function called when the upper protocol has added datagrams to
+    /// A function the framework calls when the upper protocol has added datagrams to
     /// `upperSendQueue`.
-    /// NOTE: Protocols should implement this function to customize behavior
+    ///
+    /// Protocols should implement this function to customize behavior.
     func serviceUpperSendQueue()
 
-    /// A value to set to cap the maximum datagram size that the upper protocol
-    /// will be allowed to send.
+    /// The maximum datagram size the upper protocol can send.
     var maximumUpperDatagramSize: Int { get set }
 
-    /// A boolean to set if the upper protocol should be blocked from sending
-    /// datagrams.
+    /// A Boolean value that indicates whether the upper protocol is blocked from sending datagrams.
     var blockUpperSendQueue: Bool { get set }
 
-    /// A queue of datagrams that will be delivered to the upper protocol.
-    /// NOTE: Protocols generally do not need to access this directly.
+    /// A queue of datagrams the framework delivers to the upper protocol.
+    ///
+    /// Protocols generally don't need to access this directly.
     /// Instead, call `addToUpperReceiveQueue`.
     var upperReceiveQueue: FrameArray { get set }
 
@@ -98,13 +109,16 @@ public protocol AutomaticUpperDatagramProcessing: ~Copyable, OutboundDatagramHan
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 extension AutomaticUpperDatagramProcessing where Self: ~Copyable {
-    /// A function to call to add datagrams to `upperReceiveQueue`
+    /// Adds datagrams to the upper receive queue.
+    ///
+    /// Appends frames to `upperReceiveQueue`.
     public mutating func addToUpperReceiveQueue(_ datagrams: consuming FrameArray) throws(NetworkError) {
         upperReceiveQueue.add(frames: datagrams)
     }
 
-    /// A function to call to indicate to the upper protocol that datagrams
-    /// have been added to the `upperReceiveQueue`.
+    /// Indicates to the upper protocol that datagrams have been added to the receive queue.
+    ///
+    /// Notifies the upper protocol that frames are available in `upperReceiveQueue`.
     public func serviceUpperReceiveQueue() {
         guard !upperReceiveQueue.isEmpty else { return }
         upper.deliverInboundDataAvailableEvent(reference)

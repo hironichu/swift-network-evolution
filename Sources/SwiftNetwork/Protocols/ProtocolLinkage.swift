@@ -12,8 +12,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// A protocol linkage is a strongly-typed struct that holds a reference to another protocol,
-/// and can dispatch functions to it. Each linkage is paired with a linkage that matches it.
+/// A strongly typed structure that holds a reference to another protocol and dispatches functions to it.
+///
+/// Each linkage is paired with a matching linkage.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol ProtocolLinkage {

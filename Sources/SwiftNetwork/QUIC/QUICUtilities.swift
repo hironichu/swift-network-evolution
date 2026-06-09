@@ -176,11 +176,11 @@ public struct QUICConnectionUtilities {
         )
     }
 
-    /// Given a token and a length, create a Stateless Reset packet
+    /// Creates a stateless reset packet from the given token and length.
     ///
     /// - Parameters:
-    ///     - token: The stateless reset token to send
-    ///     - triggeringPacketLength: The size of the packet that cause this stateless reset token to be sent
+    ///     - token: The stateless reset token to send.
+    ///     - triggeringPacketLength: The size of the packet that caused this stateless reset token to be sent.
     public static func createStatelessResetPacket(
         token: QUICStatelessResetToken,
         triggeringPacketLength: Int

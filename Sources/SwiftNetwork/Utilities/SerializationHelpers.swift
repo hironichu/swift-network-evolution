@@ -17,16 +17,17 @@
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol DeserializerSpanFactory: ~Copyable, ~Escapable {
-    /// Access the next span from the factory.
+    /// Returns the next span from the factory.
     @_lifetime(&self)
     mutating func nextSpan() -> RawSpan?
 
-    /// Access the total available byte count across all spans that this factory can emit.
+    /// The total available byte count across all spans this factory can emit.
     var availableByteCount: Int { get }
 }
 
 /// A factory that stores a single span.
-/// Used when the Deserializer is initialized directly from a RawSpan.
+///
+/// Use this factory when initializing a `Deserializer` directly from a `RawSpan`.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public struct SingleSpanFactory: ~Escapable, DeserializerSpanFactory {
@@ -55,16 +56,17 @@ public struct SingleSpanFactory: ~Escapable, DeserializerSpanFactory {
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol SerializerSpanFactory: ~Copyable, ~Escapable {
-    /// Access the next span from the factory.
+    /// Returns the next mutable span from the factory.
     @_lifetime(&self)
     mutating func nextMutableSpan() -> MutableRawSpan?
 
-    /// Access the total available byte count across all spans that this factory can emit.
+    /// The total available byte count across all spans this factory can emit.
     var availableByteCount: Int { get }
 }
 
 /// A factory that stores a single mutable span.
-/// Used when the Serializer is initialized directly from a MutableRawSpan.
+///
+/// Use this factory when initializing a `Serializer` directly from a `MutableRawSpan`.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public struct SingleMutableSpanFactory: ~Copyable, ~Escapable, SerializerSpanFactory {
@@ -92,9 +94,10 @@ public struct SingleMutableSpanFactory: ~Copyable, ~Escapable, SerializerSpanFac
 
 // MARK: - FrameArraySpanFactory
 
-/// A span factory that walks across the frames in a FrameArray,
-/// providing each frame's bytes as a span and optionally claiming
-/// consumed bytes from each frame.
+/// A span factory that walks the frames in a frame array.
+///
+/// Provides each frame's bytes as a span and optionally claims consumed bytes from each frame.
+/// Walks the frames in a `FrameArray`.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public struct FrameArraySpanFactory: ~Copyable, ~Escapable, DeserializerSpanFactory {
@@ -103,7 +106,7 @@ public struct FrameArraySpanFactory: ~Copyable, ~Escapable, DeserializerSpanFact
     private var spanCount: Int
     public private(set) var availableByteCount: Int
 
-    /// Extract the frame array from the factory, consuming it in the process.
+    /// Extracts the frame array from the factory, consuming the factory in the process.
     consuming func takeFrameArray() -> FrameArray {
         frameArray
     }

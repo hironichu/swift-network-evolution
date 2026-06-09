@@ -51,7 +51,7 @@ enum SocketType: CUnsignedInt, Sendable {
 
 }
 
-/// System type for creating a cross platform socket
+/// A type that creates a cross-platform socket.
 class SystemSocket {
 
     /// Socket file descriptor
@@ -82,7 +82,7 @@ class SystemSocket {
         #endif
     }
 
-    /// Create the actual cross platform descriptor
+    /// Creates the actual cross-platform descriptor.
     private static func createSocket(
         protocolFamily: AddressFamily,
         sockType: SocketType,
@@ -104,7 +104,7 @@ class SystemSocket {
         try body(self.sockfd)
     }
 
-    /// Optionally set the socket as non-blocking
+    /// Optionally sets the socket as non-blocking.
     private func setSocketAsNonBlocking() throws(NetworkError) {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot set non-blocking")
@@ -114,7 +114,11 @@ class SystemSocket {
     }
 
     #if !NETWORK_PRIVATE
-    /// Connect the socket to an IPAddress and port
+    /// Connects the socket to a remote address and port.
+    ///
+    /// - Parameters:
+    ///   - address: The remote `IPAddress` to connect to.
+    ///   - port: The remote port to connect to.
     public func connectSocket(to address: any IPAddress, port: UInt16) throws(NetworkError) -> Bool {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot connect socket")
@@ -129,7 +133,9 @@ class SystemSocket {
         }
     }
 
-    /// Call bind on a socket with a port
+    /// Binds the socket to an address and port.
+    ///
+    /// Wraps a call to the system `bind` function.
     public func bindSocket(address: any IPAddress, port: UInt16) throws {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot bind socket")
@@ -140,7 +146,9 @@ class SystemSocket {
         }
     }
 
-    /// Connect the socket to an IPAddress
+    /// Connects the socket to a remote address.
+    ///
+    /// - Parameter address: The remote `IPAddress` to connect to.
     public func connectSocket(to address: any IPAddress) throws(NetworkError) -> Bool {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot connect socket")
@@ -151,9 +159,11 @@ class SystemSocket {
         }
     }
 
-    /// Call bind on a socket
+    /// Binds the socket.
+    ///
+    /// Wraps a call to the system `bind` function.
     public func bindSocket(address: any IPAddress, bytes: Int) throws {
-        // TODO: Change this to use Endpoint when they become vailable.
+        // TODO: Change this to use Endpoint when they become available.
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot bind socket")
             throw NetworkError.posix(EINVAL)
@@ -164,7 +174,7 @@ class SystemSocket {
     }
     #endif
 
-    /// Read from socket, at optional length on buffer
+    /// Reads from the socket up to the specified length into the buffer.
     public func read(buffer: UnsafeMutableRawPointer, size: Int) throws -> Int {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot read from socket")
@@ -183,7 +193,7 @@ class SystemSocket {
         }
     }
 
-    /// For doing basic reads on a socket. Note this should only be used for things like control or routing sockets, NOT data read from the actual network.
+    /// Performs a basic read on a socket. Use this only for control or routing sockets, not for data read from the actual network.
     public func platformRead(buffer: UnsafeMutableRawPointer, size: Int) throws -> Int {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot read from socket")
@@ -192,7 +202,7 @@ class SystemSocket {
         return sysRead(self.sockfd, buffer, size)
     }
 
-    /// Write a buffer to a socket, at optional length on buffer
+    /// Writes a buffer to the socket up to the specified length.
     public func write(buffer: UnsafeRawPointer, size: Int) throws -> Int {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot write to socket")
@@ -201,7 +211,7 @@ class SystemSocket {
         return try System.write(descriptor: self.sockfd, pointer: buffer, size: size)
     }
 
-    /// For doing basic write on a socket. Note this should only be used for things like control or routing sockets, NOT data sent to the actual network.
+    /// Performs a basic write on a socket. Use this only for control or routing sockets, not for data sent to the actual network.
     public func platformWrite(buffer: UnsafeRawPointer, size: Int) throws -> Int {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot write to socket")
@@ -210,7 +220,9 @@ class SystemSocket {
         return sysWrite(self.sockfd, buffer, size)
     }
 
-    /// For sending msghdr's on a control socket
+    /// Sends a message header on a control socket.
+    ///
+    /// Use this to send a `msghdr` structure on the socket.
     public func sendmsg(msgHdr: UnsafePointer<msghdr>, flags: CInt) throws -> Int {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot send a message on a socket")
@@ -219,7 +231,7 @@ class SystemSocket {
         return try System.sendmsg(descriptor: self.sockfd, msgHdr: msgHdr, flags: flags).result
     }
 
-    /// For receiving a message buffer on a control socket
+    /// Receives a message buffer on a control socket.
     public func recvmsg(msgHdr: UnsafeMutablePointer<msghdr>, flags: CInt) throws -> Int {
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot receive a message on a socket")

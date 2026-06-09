@@ -14,22 +14,24 @@
 
 public struct IPv6Address: IPAddress, Hashable, CustomDebugStringConvertible {
 
-    /// IPv6 any address
+    /// The IPv6 any-address.
     public static var any: IPv6Address {
         IPv6Address((0, 0, 0, 0))
     }
 
-    /// IPv6 broadcast address
+    /// The IPv6 broadcast address.
     public static var broadcast: IPv6Address {
         IPv6Address((0, 0, 0, 0))
     }
 
-    /// IPv6 loopback address
+    /// The IPv6 loopback address.
     public static var loopback: IPv6Address {
         IPv6Address((0, 0, 0, UInt32(1).bigEndian))
     }
 
-    /// Is the loopback address "::1"
+    /// A Boolean value that indicates whether this is the loopback address.
+    ///
+    /// The IPv6 loopback address is `::1`.
     public var isLoopback: Bool {
         (self == IPv6Address.loopback)
     }
@@ -78,18 +80,22 @@ public struct IPv6Address: IPAddress, Hashable, CustomDebugStringConvertible {
         return withUnsafeBytes(of: &addressFirstChunk) { $0[1] & 0xf0 }
     }
 
-    /// Is multicast
+    /// A Boolean value that indicates whether this is a multicast address.
     var isMulticast: Bool {
         var addressFirstChunk = self.address.0
         return withUnsafeBytes(of: &addressFirstChunk) { $0[0] == 0xff }
     }
 
-    /// Is an IPv4 mapped address such as "::ffff:1.2.3.4"
+    /// A Boolean value that indicates whether this is an IPv4-mapped address.
+    ///
+    /// For example, `::ffff:1.2.3.4`.
     var isIPv4Mapped: Bool {
         Self.isIPv4Mapped(from: address)
     }
 
-    /// For IPv6 addresses that are IPv4 mapped, returns the IPv4 address
+    /// The IPv4 address for an IPv4-mapped IPv6 address.
+    ///
+    /// Returns `nil` if this address isn't IPv4-mapped.
     var asIPv4: IPv4Address? {
         guard self.isIPv4Mapped else {
             return nil
@@ -108,7 +114,7 @@ public struct IPv6Address: IPAddress, Hashable, CustomDebugStringConvertible {
         self.address = tuple
     }
 
-    /// An IPv6 address as a byte array
+    /// An IPv6 address as a byte array.
     public init?(_ bytes: [UInt8]) {
         guard bytes.count == MemoryLayout<UInt32>.size * 4 else {
             return nil

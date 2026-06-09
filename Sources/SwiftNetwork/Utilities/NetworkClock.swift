@@ -12,11 +12,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// NetworkDuration is a shorter representation of Swift.Duration using only 8 bytes.
-/// The purpose of NetworkDuration is to represent times relative to the system boot up time
-/// or relative to the UNIX epoch.
-/// Although it can represent durations that span several years, its purpose is limited
-/// to representing durations relevant to networking protocols which are usually under one hour.
+/// A compact 8-byte duration representation.
+///
+/// A shorter representation of `Swift.Duration`. Use `NetworkDuration` to represent times
+/// relative to the system boot-up time or to the UNIX epoch. Although `NetworkDuration`
+/// can represent durations that span several years, its purpose is limited to durations
+/// relevant to networking protocols, which are usually under one hour.
 #if !NETWORK_EMBEDDED
 @_spi(Essentials)
 @available(Network 0.1.0, *)
@@ -209,9 +210,11 @@ public struct NetworkDuration: DurationProtocol, Hashable, Equatable, CustomStri
     }
 }
 
-/// NetworkClock is a continuous clock that mimics Swift.ContinuousClock but it has two changes
-/// 1. It uses NetworkDuration internally to make its size 8 bytes.
-/// 2. It allows clocks to be created with any random value for unit tests.
+/// A continuous clock with a compact representation and configurable initial value.
+///
+/// Mimics `Swift.ContinuousClock`, with two differences:
+/// 1. It uses `NetworkDuration` internally so its size is 8 bytes.
+/// 2. You can create a clock with any value, which is useful for unit tests.
 #if !NETWORK_EMBEDDED
 @_spi(Essentials)
 @available(Network 0.1.0, *)

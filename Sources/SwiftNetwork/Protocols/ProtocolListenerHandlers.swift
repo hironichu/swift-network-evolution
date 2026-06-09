@@ -126,7 +126,7 @@ where UpperProtocol.DataLinkage == OutboundStreamLinkage {
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
-public protocol HeterogenousListenerHandler: ~Copyable, ListenerHandler {
+public protocol HeterogeneousListenerHandler: ~Copyable, ListenerHandler {
     associatedtype SecondaryUpperProtocol: InboundFlowLinkage
 }
 

@@ -73,8 +73,9 @@ public protocol ConnectionProtocol: Identifiable, Hashable {
     associatedtype ApplicationProtocolType: NetworkProtocolOptions
 }
 
-/// Types that conform to NetworkProtocolOptions can be used
-/// when configuring protocol stacks.
+/// A protocol stack configuration option.
+///
+/// Conforming types can be used when configuring protocol stacks.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public protocol NetworkMetadataProtocol {
@@ -102,8 +103,9 @@ extension NetworkProtocolOptions {
     }
 }
 
-/// Types that conform to ConnectionStorage can be used as additional storage within
-/// a connection.
+/// Additional storage attached to a connection.
+///
+/// Conforming types can be used as additional storage within a connection.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public protocol ConnectionStorage {
@@ -116,26 +118,30 @@ public struct DefaultProtocolStorage: ConnectionStorage, Sendable {
     public init() {}
 }
 
-/// Types that conform to OneToOneProtocol are allowed to be the top protocol
-/// in a network protocol stack for non-multiplexed connections.
+/// A protocol that can sit at the top of a non-multiplexed connection's protocol stack.
+///
+/// Conforming types are allowed to be the top protocol in a network protocol stack
+/// for non-multiplexed connections.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public protocol OneToOneProtocol: NetworkProtocolOptions {
 }
 
-/// Types that conform to MultiplexProtocol are allowed to be the top protocol
-/// in a network protocol stack for multiplexing network connection objects.
+/// A protocol that can sit at the top of a multiplexed connection's protocol stack.
 ///
-/// Generally network protocols conforming to this type will not directly expose
-/// send or receive methods. Instead, they expose methods to open
-/// and listen for multiplexed Subconnections which can send and receive.
+/// Conforming types are allowed to be the top protocol in a network protocol stack
+/// for multiplexing network connection objects. Generally, network protocols
+/// conforming to this type don't directly expose send or receive methods.
+/// Instead, they expose methods to open and listen for multiplexed subconnections,
+/// which can send and receive.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public protocol MultiplexProtocol: NetworkProtocolOptions {
 }
 
-/// Types that conform to the StreamProtocol protocol expose methods for
-/// sending and receiving byte streams.
+/// A protocol that exposes byte-stream send and receive methods.
+///
+/// Conforming types expose methods for sending and receiving byte streams.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public protocol StreamProtocol: OneToOneProtocol {
@@ -146,24 +152,26 @@ public protocol StreamProtocol: OneToOneProtocol {
 extension StreamProtocol {
 }
 
-/// Types that conform to MessageProtocol send and receive messages.
-/// The conforming type is responsible for specifying its message-specific
-/// metadata.
+/// A protocol that sends and receives messages.
+///
+/// Conforming types send and receive messages. The conforming type is responsible for
+/// specifying its message-specific metadata.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public protocol MessageProtocol: OneToOneProtocol {
     associatedtype ContentType
 }
 
-/// Types that conform to DatagramProtocol send and receive messages
-/// with minimal or no metadata, usually constrained to a fixed maximum size.
+/// A protocol that sends and receives small, bounded messages.
+///
+/// Conforming types send and receive messages with minimal or no metadata,
+/// usually constrained to a fixed maximum size.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public protocol DatagramProtocol: MessageProtocol {
 }
 
-/// A resultBuilder for specifying and configuring protocol stacks in
-/// a declarative way
+/// A result builder for specifying and configuring protocol stacks declaratively.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 @resultBuilder
@@ -173,12 +181,13 @@ public struct ProtocolStackBuilder<ApplicationProtocol: NetworkProtocolOptions> 
     }
 }
 
-/// Types that conform to the NWParametersProvider protocol can be used to
-/// generate an NWParameters.
+/// A type that produces parameters for a connection.
+///
+/// Conforming types can be used to generate a `Parameters` value.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public protocol ParametersProvider {
-    /// The generated NWParameters.
+    /// The generated parameters.
     var parameters: Parameters { get set }
 
     /// Require an interface when connecting, listening, and browsing.
@@ -207,9 +216,9 @@ public protocol ParametersProvider {
     ///
     /// Prohibit connections and listeners from using a network interface
     /// that is considered expensive by the system,
-    /// for example some cellular interfaces.
+    /// for example, some cellular interfaces.
     ///
-    /// - Parameter prohibited: True if expensive paths are prohibited, false otherwise.
+    /// - Parameter prohibited: `true` if expensive paths are prohibited, otherwise `false`.
     func expensivePathsProhibited(_ prohibited: Bool) -> Self
 
     /// Prohibit using constrained paths.
@@ -218,13 +227,13 @@ public protocol ParametersProvider {
     /// that is considered constrained by the system,
     /// for example an interface in Low Data Mode.
     ///
-    /// - Parameter prohibited: True if constrained paths are prohibited, false otherwise.
+    /// - Parameter prohibited: `true` if constrained paths are prohibited, otherwise `false`.
     func constrainedPathsProhibited(_ prohibited: Bool) -> Self
 
     /// Specify a specific endpoint to use as the local endpoint.
     ///
-    /// For connections, this will be used to initiate traffic;
-    /// for listeners, this will be used for receiving incoming
+    /// For connections, this is used to initiate traffic;
+    /// for listeners, this is used for receiving incoming
     /// connections.
     ///
     /// - Parameter endpoint: The local endpoint to require, or `nil` if none.
@@ -233,12 +242,11 @@ public protocol ParametersProvider {
     /// Specify a specific port to use as the local endpoint,
     /// letting the system select the address.
     ///
-    /// For connections, this will be used to initiate traffic;
-    /// for listeners, this will be used for receiving incoming
+    /// For connections, this is used to initiate traffic;
+    /// for listeners, this is used for receiving incoming
     /// connections.
     ///
     /// - Parameter port: The local port to require.
-    /// Force a specific local port to be used.
     func localPort(_ port: UInt16) -> Self
 
     /// Allow local endpoint reuse.
@@ -246,15 +254,15 @@ public protocol ParametersProvider {
     /// Allow multiple connections to use the same local address and port
     /// (`SO_REUSEADDR` and `SO_REUSEPORT`).
     ///
-    /// - Parameter allowed: True if allowed, false otherwise.
+    /// - Parameter allowed: `true` if allowed, otherwise `false`.
     func localEndpointReuseAllowed(_ allowed: Bool) -> Self
 
     /// Limit inbound connections to peers attached to the local link.
     ///
-    /// Listeners will only advertise services on the local link and
-    /// will only accept connections from the local link.
+    /// Listeners only advertise services on the local link and
+    /// only accept connections from the local link.
     ///
-    /// - Parameter local: True if limited to local peers, false otherwise.
+    /// - Parameter local: `true` if limited to local peers, otherwise `false`.
     func localOnly(_ local: Bool) -> Self
 
     /// Require DNSSEC validation when resolving an endpoint before making
@@ -264,17 +272,17 @@ public protocol ParametersProvider {
     /// requires domain name resolution, such as a host or URL endpoint.
     ///
     /// - If this is not set or is set to `false`, DNSSEC validation
-    /// will not be required.
+    /// isn't required.
     ///
     /// - If this is set to `true` and no additional DNSSEC configuration
-    ///	 is set, the default behavior will be followed:
-    ///	 Only DNSSEC secure and DNSSEC insecure
-    ///	 resolved results will be used to establish a connection.
+    ///	 is set, the default behavior is followed:
+    ///	 only DNSSEC secure and DNSSEC insecure
+    ///	 resolved results are used to establish a connection.
     ///
     /// - If this is set to `true` and additional DNSSEC configuration
-    /// is set on the parameters, the behavior specified by that configuration will be used.
+    /// is set on the parameters, the behavior specified by that configuration is used.
     ///
-    /// - Parameter required: True if DNSSEC validation is required, false otherwise.
+    /// - Parameter required: `true` if DNSSEC validation is required, otherwise `false`.
     func dnssecValidationRequired(_ required: Bool) -> Self
 
     /// Set the data service class to use for connections.
@@ -296,22 +304,22 @@ public protocol ParametersProvider {
     /// > Warning: This may have security implications for application data.
     /// In particular, TLS early data is replayable by a network attacker.
     /// You must account for this when sending data before the handshake
-    /// is confirmed. See RFC 8446 for more information. You MUST NOT
+    /// is confirmed. See RFC 8446 for more information. Don't
     /// enable fast open without a specific application profile that defines its use.
     ///
     /// As a side effect, this may implicitly enable fast open or early data for protocols
-    /// in the stack, even if they did not have fast open explicitly enabled on them
+    /// in the stack, even if they didn't have fast open explicitly enabled on them
     /// (such as the option to enable TCP Fast Open).
     ///
-    /// - Parameter allowed: True if fast open should be used, false otherwise.
+    /// - Parameter allowed: `true` if fast open should be used, otherwise `false`.
     func fastOpenAllowed(_ allowed: Bool) -> Self
 
     /// Allow or prohibit the use of expired DNS answers during connection establishment.
     ///
-    /// If allowed, a DNS answer that was previously returned may be re-used for new
+    /// If allowed, a DNS answer that was previously returned may be reused for new
     /// connections even after the answers are considered expired. A query for fresh answers
-    /// will be sent in parallel, and the fresh answers will be used as alternate addresses
-    /// in case the expired answers do not result in successful connections.
+    /// is sent in parallel, and the fresh answers are used as alternate addresses
+    /// in case the expired answers don't result in successful connections.
     ///
     /// By default, this value is `.systemDefault`, which allows the system to determine
     /// if it is appropriate to use expired answers.
@@ -379,9 +387,9 @@ extension ParametersProvider {
     ///
     /// Prohibit connections and listeners from using a network interface
     /// that is considered expensive by the system,
-    /// for example some cellular interfaces.
+    /// for example, some cellular interfaces.
     ///
-    /// - Parameter prohibited: True if expensive paths are prohibited, false otherwise.
+    /// - Parameter prohibited: `true` if expensive paths are prohibited, otherwise `false`.
     public func expensivePathsProhibited(_ prohibited: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.parameters.prohibitExpensivePaths = prohibited
@@ -394,7 +402,7 @@ extension ParametersProvider {
     /// that is considered constrained by the system,
     /// for example an interface in Low Data Mode.
     ///
-    /// - Parameter prohibited: True if constrained paths are prohibited, false otherwise.
+    /// - Parameter prohibited: `true` if constrained paths are prohibited, otherwise `false`.
     public func constrainedPathsProhibited(_ prohibited: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.parameters.prohibitConstrainedPaths = prohibited
@@ -403,8 +411,8 @@ extension ParametersProvider {
 
     /// Specify a specific endpoint to use as the local endpoint.
     ///
-    /// For connections, this will be used to initiate traffic;
-    /// for listeners, this will be used for receiving incoming
+    /// For connections, this is used to initiate traffic;
+    /// for listeners, this is used for receiving incoming
     /// connections.
     ///
     /// - Parameter endpoint: The local endpoint to require, or `nil` if none.
@@ -417,12 +425,11 @@ extension ParametersProvider {
     /// Specify a specific port to use as the local endpoint,
     /// letting the system select the address.
     ///
-    /// For connections, this will be used to initiate traffic;
-    /// for listeners, this will be used for receiving incoming
+    /// For connections, this is used to initiate traffic;
+    /// for listeners, this is used for receiving incoming
     /// connections.
     ///
     /// - Parameter port: The local port to require.
-    /// Force a specific local port to be used.
     public func localPort(_ port: UInt16) -> Self {
         var mutableSelf = self
         mutableSelf.parameters.localAddress = Endpoint(hostname: "::", port: port)
@@ -434,7 +441,7 @@ extension ParametersProvider {
     /// Allow multiple connections to use the same local address and port
     /// (`SO_REUSEADDR` and `SO_REUSEPORT`).
     ///
-    /// - Parameter allowed: True if allowed, false otherwise.
+    /// - Parameter allowed: `true` if allowed, otherwise `false`.
     public func localEndpointReuseAllowed(_ allowed: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.parameters.reuseLocalAddress = allowed
@@ -443,10 +450,10 @@ extension ParametersProvider {
 
     /// Limit inbound connections to peers attached to the local link.
     ///
-    /// Listeners will only advertise services on the local link and
-    /// will only accept connections from the local link.
+    /// Listeners only advertise services on the local link and
+    /// only accept connections from the local link.
     ///
-    /// - Parameter local: True if limited to local peers, false otherwise.
+    /// - Parameter local: `true` if limited to local peers, otherwise `false`.
     public func localOnly(_ local: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.parameters.localOnly = local
@@ -460,17 +467,17 @@ extension ParametersProvider {
     /// requires domain name resolution, such as a host or URL endpoint.
     ///
     /// - If this is not set or is set to `false`, DNSSEC validation
-    /// will not be required.
+    /// isn't required.
     ///
     /// - If this is set to `true` and no additional DNSSEC configuration
-    ///	 is set, the default behavior will be followed:
-    ///	 Only DNSSEC secure and DNSSEC insecure
-    ///	 resolved results will be used to establish a connection.
+    ///	 is set, the default behavior is followed:
+    ///	 only DNSSEC secure and DNSSEC insecure
+    ///	 resolved results are used to establish a connection.
     ///
     /// - If this is set to `true` and additional DNSSEC configuration
-    /// is set on the parameters, the behavior specified by that configuration will be used.
+    /// is set on the parameters, the behavior specified by that configuration is used.
     ///
-    /// - Parameter required: True if DNSSEC validation is required, false otherwise.
+    /// - Parameter required: `true` if DNSSEC validation is required, otherwise `false`.
     public func dnssecValidationRequired(_ required: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.parameters.requiresDNSSECValidation = required
@@ -504,14 +511,14 @@ extension ParametersProvider {
     /// > Warning: This may have security implications for application data.
     /// In particular, TLS early data is replayable by a network attacker.
     /// You must account for this when sending data before the handshake
-    /// is confirmed. See RFC 8446 for more information. You MUST NOT
+    /// is confirmed. See RFC 8446 for more information. Don't
     /// enable fast open without a specific application profile that defines its use.
     ///
     /// As a side effect, this may implicitly enable fast open or early data for protocols
-    /// in the stack, even if they did not have fast open explicitly enabled on them
+    /// in the stack, even if they didn't have fast open explicitly enabled on them
     /// (such as the option to enable TCP Fast Open).
     ///
-    /// - Parameter allowed: True if fast open should be used, false otherwise.
+    /// - Parameter allowed: `true` if fast open should be used, otherwise `false`.
     public func fastOpenAllowed(_ allowed: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.parameters.fastOpenEnabled = allowed
@@ -520,10 +527,10 @@ extension ParametersProvider {
 
     /// Allow or prohibit the use of expired DNS answers during connection establishment.
     ///
-    /// If allowed, a DNS answer that was previously returned may be re-used for new
+    /// If allowed, a DNS answer that was previously returned may be reused for new
     /// connections even after the answers are considered expired. A query for fresh answers
-    /// will be sent in parallel, and the fresh answers will be used as alternate addresses
-    /// in case the expired answers do not result in successful connections.
+    /// is sent in parallel, and the fresh answers are used as alternate addresses
+    /// in case the expired answers don't result in successful connections.
     ///
     /// By default, this value is `.systemDefault`, which allows the system to determine
     /// if it is appropriate to use expired answers.
@@ -554,7 +561,9 @@ extension ParametersProvider {
     }
 }
 
-/// An extension for Parameters that supports chainable configuration.
+/// An extension that adds chainable configuration to parameters.
+///
+/// Conforms `Parameters` to `ParametersProvider`.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 extension Parameters: ParametersProvider {
@@ -568,7 +577,9 @@ extension Parameters: ParametersProvider {
     }
 }
 
-/// Send and receive unreliable datagrams over QUIC via RFC 9221
+/// Sends and receives unreliable datagrams over QUIC.
+///
+/// Implements RFC 9221.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public struct QUICDatagram: DatagramProtocol {
@@ -680,7 +691,7 @@ public struct TLS: StreamProtocol {
     /// Application layer protocol negotiation (ALPN) tokens
     /// describe the application protocol in use above TLS.
     ///
-    /// - Parameters protocols: An array of application layer protocol
+    /// - Parameter protocols: An array of application layer protocol
     /// tokens to use for negotiation during the TLS handshake.
     public func applicationProtocols(_ protocols: [String]) -> Self {
         var mutableSelf = self
@@ -749,7 +760,7 @@ public struct TCP: StreamProtocol {
     /// A boolean indicating that TCP should disable
     /// Nagle's algorithm (`TCP_NODELAY`).
     ///
-    /// - Parameter noDelay: True to disable Nagle's algorithm, false otherwise.
+    /// - Parameter noDelay: `true` to disable Nagle's algorithm, otherwise `false`.
     public func noDelay(_ noDelay: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.noDelay = noDelay
@@ -760,7 +771,7 @@ public struct TCP: StreamProtocol {
     ///
     /// A boolean indicating that TCP should use no-push mode (`TCP_NOPUSH`).
     ///
-    /// - Parameter noPush: True to use no-push mode, false otherwise.
+    /// - Parameter noPush: `true` to use no-push mode, otherwise `false`.
     public func noPush(_ noPush: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.noPush = noPush
@@ -771,7 +782,7 @@ public struct TCP: StreamProtocol {
     ///
     /// A boolean indicating that TCP should use no-options mode (`TCP_NOOPT`).
     ///
-    /// - Parameter noOptions: True to use no-options mode, false otherwise.
+    /// - Parameter noOptions: `true` to use no-options mode, otherwise `false`.
     public func noOptions(_ noOptions: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.noOptions = noOptions
@@ -834,7 +845,7 @@ public struct TCP: StreamProtocol {
         return mutableSelf
     }
 
-    /// Set maximum segment size.
+    /// Set the maximum segment size.
     ///
     /// The maximum segment size in bytes (`TCP_MAXSEG`).
     ///
@@ -886,7 +897,7 @@ public struct TCP: StreamProtocol {
     /// A boolean to cause TCP to drop its connection after
     /// not receiving an ACK after a FIN (`TCP_RXT_FINDROP`).
     ///
-    /// - Parameter drop: True to drop, false otherwise.
+    /// - Parameter drop: `true` to drop, otherwise `false`.
     public func retransmitFinDrop(_ drop: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.retransmitFinDrop = drop
@@ -897,7 +908,7 @@ public struct TCP: StreamProtocol {
     ///
     /// A boolean to cause TCP to disable ACK stretching (`TCP_SENDMOREACKS`).
     ///
-    /// - Parameter disableAckStretching: True to disable ACK stretching, false otherwise.
+    /// - Parameter disableAckStretching: `true` to disable ACK stretching, otherwise `false`.
     public func ackStretchingDisabled(_ disableAckStretching: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.disableAckStretching = disableAckStretching
@@ -906,7 +917,7 @@ public struct TCP: StreamProtocol {
 
     /// Disable ECN negotiation.
     ///
-    /// - Parameter disableECN: True to disable ECN, false otherwise.
+    /// - Parameter disableECN: `true` to disable ECN, otherwise `false`.
     public func ecnDisabled(_ disableECN: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.disableECN = disableECN
@@ -925,12 +936,12 @@ public struct TCP: StreamProtocol {
     /// in the protocol stack. For example, if TLS is running over TCP,
     /// the Client Hello message may be sent as fast open data.
     ///
-    /// If TCP is the top-level protocol in the stack (the one the application
-    /// directly interacts with), TFO will be disabled unless the application
-    /// indicated that it will provide its own fast open data by calling
-    /// NWParameters.allowFastOpen.
+    /// If TCP is the top-level protocol in the stack (the one the app
+    /// directly interacts with), TFO is disabled unless the app
+    /// indicates that it provides its own fast open data by calling
+    /// `Parameters.allowFastOpen`.
     ///
-    /// - Parameter allowed: True to allow TFO, false otherwise.
+    /// - Parameter allowed: `true` to allow TFO, otherwise `false`.
     public func fastOpenAllowed(_ allowed: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.fastOpen = allowed
@@ -943,12 +954,12 @@ public struct TCP: StreamProtocol {
     /// in the protocol stack. For example, if TLS is running over TCP,
     /// the Client Hello message may be sent as fast open data.
     ///
-    /// If TCP is the top-level protocol in the stack (the one the application
-    /// directly interacts with), TFO will be disabled unless the application
-    /// indicated that it will provide its own fast open data by calling
-    /// NWParameters.allowFastOpen.
+    /// If TCP is the top-level protocol in the stack (the one the app
+    /// directly interacts with), TFO is disabled unless the app
+    /// indicates that it provides its own fast open data by calling
+    /// `Parameters.allowFastOpen`.
     ///
-    /// - Parameter enabled: True to enable TFO, false otherwise.
+    /// - Parameter enabled: `true` to enable TFO, otherwise `false`.
     public func fastOpen(_ enabled: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.fastOpen = enabled
@@ -1040,7 +1051,7 @@ public struct NoTransport: StreamProtocol {
 
 /// The system definition of the QUIC protocol.
 ///
-/// Conforms to MultiplexProtocol,
+/// Conforms to `MultiplexProtocol`,
 /// exposing configuration for a multiplexing instance of QUIC, which
 /// in turn exposes the ability to handle multiple streams of data over QUIC.
 @_spi(Essentials)
@@ -1134,7 +1145,7 @@ public struct QUIC: MultiplexProtocol {
     /// Set the idle timeout for the QUIC connection, in milliseconds.
     ///
     /// If no packets are sent or received within this timeout,
-    /// the QUIC connection will be closed.
+    /// the QUIC connection is closed.
     ///
     /// - Parameter timeout: The idle timeout, in milliseconds.
     public func idleTimeout(_ timeout: Int) -> Self {
@@ -1263,7 +1274,7 @@ public struct QUIC: MultiplexProtocol {
         return mutableSelf
     }
 
-    /// Configure TLS when used within QUIC.
+    /// The TLS configuration to use within QUIC.
     public var tls: TLS {
         QUIC.TLS(self)
     }
@@ -1322,9 +1333,9 @@ public struct QUIC: MultiplexProtocol {
 
 /// A QUIC stream that runs over a QUIC connection.
 ///
-/// Connections using QUICStream have a similar stream interface to TLS and TCP.
+/// Connections using `QUICStream` have a similar stream interface to TLS and TCP.
 ///
-/// > Note: This type is not intended to be inserted into the protocol stack manually; it is vended by connections that use QUIC.
+/// > Note: This type isn't intended to be inserted into the protocol stack manually; it's provided by connections that use QUIC.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public struct QUICStream: StreamProtocol {
@@ -1371,7 +1382,7 @@ public struct UDP: DatagramProtocol {
 
     /// Skip computing checksums when sending UDP packets.
     ///
-    /// This will only take effect when running over IPv4 (`UDP_NOCKSUM`).
+    /// This only takes effect when running over IPv4 (`UDP_NOCKSUM`).
     public func noChecksumPreferred(_ noChecksum: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.preferNoChecksum = noChecksum
@@ -1389,7 +1400,7 @@ public struct UDP: DatagramProtocol {
 ///
 /// Can be used to insert IP into a protocol stack.
 ///
-/// > Note: Specifying IP is optional, and need only be included in a
+/// > Note: Specifying IP is optional, and you only need to include it in a
 /// protocol stack when configuring IP options.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
@@ -1449,8 +1460,8 @@ public struct IP: NetworkProtocolOptions {
 
     /// Specify a single version of the Internet Protocol to allow.
     ///
-    /// Setting this value will constrain which address endpoints can
-    /// be used and will filter DNS results during connection establishment.
+    /// Setting this value constrains which address endpoints can
+    /// be used and filters DNS results during connection establishment.
     ///
     /// - Parameter version: The IP version, IPv4 or IPv6.
     public func version(_ version: IPProtocol.Version) -> Self {
@@ -1476,7 +1487,7 @@ public struct IP: NetworkProtocolOptions {
     /// The minimum MTU value is 1280 bytes for IPv6 (`IPV6_USE_MIN_MTU`).
     /// This value has no effect for IPv4.
     ///
-    /// - Parameter useMinimumMTU: True to use the minimum MTU value, false otherwise.
+    /// - Parameter useMinimumMTU: `true` to use the minimum MTU value, otherwise `false`.
     public func minimumMTU(_ useMinimumMTU: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.useMinimumMTU = useMinimumMTU
@@ -1487,7 +1498,7 @@ public struct IP: NetworkProtocolOptions {
     ///
     /// Equivalent to `IP_DONTFRAG` for IPv4 and `IPV6_DONTFRAG` for IPv6.
     ///
-    /// - Parameter dontFragment: True to disable fragmentation, false otherwise.
+    /// - Parameter dontFragment: `true` to disable fragmentation, otherwise `false`.
     public func fragmentationDisabled(_ dontFragment: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.disableFragmentation = dontFragment
@@ -1496,7 +1507,7 @@ public struct IP: NetworkProtocolOptions {
 
     /// Configure IP to calculate receive time for inbound packets.
     ///
-    /// - Parameter calculateReceiveTime: True to calculate receive time, false otherwise.
+    /// - Parameter calculateReceiveTime: `true` to calculate receive time, otherwise `false`.
     public func receiveTimeCalculated(_ calculateReceiveTime: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.calculateReceiveTime = calculateReceiveTime
@@ -1516,12 +1527,12 @@ public struct IP: NetworkProtocolOptions {
     /// Specify if multicast packets should be looped back for local delivery.
     ///
     /// By default, a multicast packet sent to a group to which the sending host itself belongs
-    /// will be looped back for local delivery. `disableMulticastLoopback` disables
-    /// this behavior and, if set, multicast packets will not be looped back to the sender.
+    /// is looped back for local delivery. `disableMulticastLoopback` disables
+    /// this behavior and, if set, multicast packets aren't looped back to the sender.
     ///
     /// > Note: Only applies to multicast packets.
     ///
-    /// - Parameter disableMulticastLoopback: True to disable multicast loopback, false otherwise.
+    /// - Parameter disableMulticastLoopback: `true` to disable multicast loopback, otherwise `false`.
     public func multicastLoopbackDisabled(_ disableMulticastLoopback: Bool) -> Self {
         var mutableSelf = self
         mutableSelf.disableMulticastLoopback = disableMulticastLoopback
@@ -1547,8 +1558,10 @@ public struct IP: NetworkProtocolOptions {
 extension DatagramProtocol {
 }
 
-// An opaque class that is responsible for creating and configuring NWParameters based on
-/// the parameterized protocol stack.
+/// A builder that creates and configures parameters from a parameterized protocol stack.
+///
+/// `ParametersBuilder` is an opaque type that produces a `Parameters` value
+/// based on the protocol stack you supply.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public struct ParametersBuilder<Top: NetworkProtocolOptions>: ParametersProvider {
@@ -1587,10 +1600,10 @@ public struct ParametersBuilder<Top: NetworkProtocolOptions>: ParametersProvider
     }
 }
 
-/// Connect to an endpoint on the network to send and receive data.
+/// A connection to an endpoint on the network for sending and receiving data.
 ///
 /// A connection handles establishment of any transport, security, and application-level protocols
-/// required to transmit and receive user data. Connections may make multiple establishment
+/// required to transmit and receive user data. A connection may make multiple establishment
 /// attempts before the connection is ready.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
@@ -1606,12 +1619,12 @@ public final class NetworkConnection<ApplicationProtocol: NetworkProtocolOptions
 
     fileprivate let lockedState = NetworkMutex<LockedState>(LockedState())
 
-    /// Outbound connections
+    /// Creates an outbound connection.
     internal override init(kind: Kind, endpoint: Endpoint, parameters: Parameters, uuid: SystemUUID) {
         super.init(kind: kind, endpoint: endpoint, parameters: parameters, uuid: uuid)
     }
 
-    /// Inbound connections
+    /// Creates an inbound connection.
     internal override init(kind: Kind, using flow: EndpointFlow, uuid: SystemUUID) {
         super.init(kind: kind, using: flow, uuid: uuid)
     }
@@ -1622,14 +1635,16 @@ public final class NetworkConnection<ApplicationProtocol: NetworkProtocolOptions
         }
     }
 
-    /// The remote endpoint of the connection
+    /// The remote endpoint of the connection.
     public var remoteEndpoint: Endpoint? {
         get {
             self.endpointFlow.remoteEndpoint
         }
     }
 
-    /// A variant of cancel that performs non-graceful closure of the transport.
+    /// A non-graceful variant of cancel that doesn't allow the transport to close cleanly.
+    ///
+    /// Performs the same effect as `cancel()`, but skips graceful shutdown of the transport.
     public func forceCancel() {
         cancel()
     }
@@ -1644,7 +1659,7 @@ public final class NetworkConnection<ApplicationProtocol: NetworkProtocolOptions
     }
 
     /// Set a closure to be called when the connection's state changes, which may be called
-    /// multiple times until the connection is cancelled.
+    /// multiple times until the connection is canceled.
     @discardableResult public func onStateUpdate(
         _ handler: (@escaping @Sendable (_ connection: NetworkConnection, _ state: State) -> Void)
     ) -> Self {
@@ -1659,17 +1674,17 @@ public final class NetworkConnection<ApplicationProtocol: NetworkProtocolOptions
 @available(Network 0.1.0, *)
 public class NetworkChannelBase {
     public enum State: Equatable, Sendable {
-        /// The initial state prior to start
+        /// The initial state prior to start.
         case setup
-        /// Waiting connections have not yet been started, or do not have a viable network
+        /// Waiting connections haven't yet been started, or don't have a viable network.
         case waiting(NetworkError)
-        /// Preparing connections are actively establishing the connection
+        /// Preparing connections are actively establishing the connection.
         case preparing
-        /// Ready connections can send and receive data
+        /// Ready connections can send and receive data.
         case ready
-        /// Failed connections are disconnected and can no longer send or receive data
+        /// Failed connections are disconnected and can no longer send or receive data.
         case failed(NetworkError)
-        /// Cancelled connections have been invalidated by the client and will send no more events
+        /// Canceled connections have been invalidated by the client and send no more events.
         case cancelled
 
         internal init(_ nw: EndpointFlow.State) {
@@ -1742,10 +1757,10 @@ public class NetworkChannelBase {
     }
 }
 
-/// A base class supporting sending and recieving data through an arbitrary network channel.
+/// A base class supporting sending and receiving data through an arbitrary network channel.
 ///
 /// The interface exposed by this type (and any derived classes) is dependent on the
-/// generic ApplicationProtocol parameter.
+/// generic `ApplicationProtocol` parameter.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public class NetworkChannel<ApplicationProtocol: NetworkProtocolOptions>: NetworkChannelBase,
@@ -1753,7 +1768,9 @@ public class NetworkChannel<ApplicationProtocol: NetworkProtocolOptions>: Networ
 {
     let uuid: SystemUUID
 
-    /// Compare two instances of NetworkChannel for equality
+    /// Compares two channels for equality.
+    ///
+    /// Compares two instances of `NetworkChannel` for equality.
     public static func == (lhs: NetworkChannel, rhs: NetworkChannel) -> Bool {
         lhs.id == rhs.id
     }
@@ -1787,12 +1804,14 @@ public class NetworkChannel<ApplicationProtocol: NetworkProtocolOptions>: Networ
         return self
     }
 
-    /// Generate a string representation of NetworkChannel suitable for logging
+    /// Generates a string representation of the channel suitable for logging.
+    ///
+    /// Returns a description of the underlying `NetworkChannel`.
     public var debugDescription: String {
         endpointFlow.debugDescription
     }
 
-    /// The set of parameters with which the channel was created
+    /// The set of parameters with which the channel was created.
     public var parameters: Parameters {
         get {
             endpointFlow.parameters
@@ -1805,12 +1824,13 @@ public class NetworkChannel<ApplicationProtocol: NetworkProtocolOptions>: Networ
         }
     }
 
-    /// Cancel the connection, and cause all update handlers to be cancelled.
+    /// Cancels the connection and any registered update handlers.
     ///
-    /// Cancel is asynchronous. The last callback will be to the stateUpdateHandler with the cancelled state. After
-    /// the stateUpdateHandlers are called with the cancelled state, all blocks are released to break retain cycles.
+    /// Cancellation is asynchronous. The last callback is to the `stateUpdateHandler`
+    /// with the canceled state. After that final callback, all blocks are released
+    /// to break retain cycles.
     ///
-    /// Calls to cancel after the first one are ignored.
+    /// Calls to `cancel()` after the first one are ignored.
     public func cancel() {
         endpointFlow.cancel()
     }
@@ -1847,7 +1867,7 @@ extension NetworkConnection where ApplicationProtocol: OneToOneProtocol {
 
     /// Create a new connection to an endpoint, with protocol stack.
     ///
-    /// - Parameter to: The remote endpoint
+    /// - Parameter to: The remote endpoint.
     /// - Parameter using: The protocol stack to use for this connection.
     public convenience init(
         to endpoint: Endpoint,
@@ -1885,11 +1905,12 @@ extension NetworkConnection where ApplicationProtocol: OneToOneProtocol {
         self.init(kind: .noTransport, endpoint: endpoint, parameters: builder.parameters, uuid: uuid)
     }
 
-    /// Create a new outbound connection to an endpoint, with parameters.
+    /// Creates a new outbound connection to an endpoint, with parameters.
+    ///
     /// The parameters determine the protocols to be used for the connection, and their options.
     ///
     /// - Parameter to: The remote endpoint to which to connect.
-    /// - Parameter using: The parameters define which protocols and path to use.
+    /// - Parameter using: The parameters that define which protocols and path to use.
     public convenience init(
         to endpoint: Endpoint,
         uuid: SystemUUID = SystemUUID(),
@@ -1947,15 +1968,18 @@ extension NetworkConnection where ApplicationProtocol: MultiplexProtocol {
         self.init(to: endpoint, using: builder.parameters, uuid: uuid)
     }
 
-    /// Initiate some action to open the connection on the network like making a handshake, initiating a multiplexing session, etc.
-    /// Starts the connection, which will cause the connection to evaluate its path, do resolution, and try to become
-    /// ready (connected). `NetworkConnection` establishment is asynchronous. `onStateUpdate` will be called
-    /// when the state changes. If the connection cannot be established, the state will transition to `waiting` with
-    /// an associated error describing the reason. If an unrecoverable error is encountered, the state will
-    /// transition to `failed` with an associated error value. If the connection is established, the state will
-    /// transition to `ready`.
+    /// Starts the connection.
     ///
-    /// Start should only be called once on a connection, and multiple calls to start will be ignored.
+    /// Initiates the action to open the connection on the network, for example,
+    /// by making a handshake or initiating a multiplexing session. Causes the
+    /// connection to evaluate its path, perform resolution, and try to become ready
+    /// (connected). Establishment is asynchronous; `onStateUpdate` is called when the
+    /// state changes. If the connection can't be established, the state transitions to
+    /// `waiting` with an associated error describing the reason. If an unrecoverable
+    /// error is encountered, the state transitions to `failed` with an associated
+    /// error value. If the connection is established, the state transitions to `ready`.
+    ///
+    /// Call `start()` only once on a connection; subsequent calls are ignored.
     @discardableResult public func start() -> Self {
         endpointFlow.start()
         return self
@@ -2011,7 +2035,7 @@ extension QUIC {
         }
 
         /// Set a closure to be called when the connection's state changes, which may be called
-        /// multiple times until the connection is cancelled.
+        /// multiple times until the connection is canceled.
         @discardableResult public func onStateUpdate(
             _ handler: (@escaping @Sendable (_ connection: Stream, _ state: State) -> Void)
         ) -> Self {
@@ -2039,15 +2063,17 @@ extension NetworkConnection where ApplicationProtocol == QUIC {
         case newConnection(QUIC.Stream<QUICStream>)
     }
 
-    /// Initiate a new data stream over QUIC. When invoked with no parameters, the default stream
-    /// type will be bidirectional. Unidirectional streams can be initiated by setting the
-    /// optional `bidirectional` parameter to false.
+    /// Initiates a new data stream over QUIC.
     ///
-    /// This call will start the underlying QUIC connection if it has not been started already
-    /// and will block until the QUIC connection is ready.
+    /// When invoked with no parameters, the default stream type is bidirectional.
+    /// Unidirectional streams can be initiated by setting the optional `directionality`
+    /// parameter to `.unidirectional`.
     ///
-    /// While streams can be cancelled independently of the underlying connection,
-    /// if the parent NetworkChannel is cancelled or fails, the streams will as well.
+    /// This call starts the underlying QUIC connection if it has not been started already
+    /// and blocks until the QUIC connection is ready.
+    ///
+    /// While streams can be canceled independently of the underlying connection,
+    /// if the parent `NetworkChannel` is canceled or fails, the streams are too.
     public func openStream(
         directionality: QUICStream.Directionality = .bidirectional,
         uuid: SystemUUID = SystemUUID(),

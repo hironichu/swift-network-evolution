@@ -68,7 +68,9 @@ public struct SystemUUID: Hashable, Equatable, CustomStringConvertible, Sendable
         self.storage = storage
     }
 
-    /// Returns a string created from the UUID, such as "E621E1F8-C36C-495A-93FC-0C247A3E6E5F"
+    /// Returns a string representation of the UUID.
+    ///
+    /// For example, `E621E1F8-C36C-495A-93FC-0C247A3E6E5F`.
     public var description: String {
         var result = ""
         for i in 0..<storage.count {

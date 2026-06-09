@@ -84,7 +84,7 @@ public struct Deserializer<Factory: DeserializerSpanFactory & ~Copyable & ~Escap
     private var previousSpanAggregateByteCount = 0
     private(set) var internalResult: DeserializationResult = .success
 
-    /// Extract the factory from the deserializer, consuming it in the process.
+    /// Extracts the factory from the deserializer, consuming the deserializer in the process.
     @_lifetime(copy self)
     consuming func takeFactory() -> Factory {
         factory
@@ -98,9 +98,9 @@ public struct Deserializer<Factory: DeserializerSpanFactory & ~Copyable & ~Escap
         self.refill()
     }
 
-    /// Refill the deserializer with the next span from the factory.
-    /// Resets the cursor and internal result so deserialization can continue.
-    /// Returns `false` if the factory has no more spans available.
+    /// Refills the deserializer with the next span from the factory, and resets the cursor and internal result so deserialization can continue.
+    ///
+    /// - Returns: A Boolean value that indicates whether the factory had another span available; returns `false` when no more spans remain.
     @discardableResult
     mutating func refill() -> Bool {
         guard let span = factory.nextSpan() else {
@@ -157,9 +157,9 @@ public struct Deserializer<Factory: DeserializerSpanFactory & ~Copyable & ~Escap
         cursor &+= amount
     }
 
-    /// Read a fixed-size value across span boundaries, using the stored
-    /// scratch space and refilling as needed.
-    /// Call this when `hasRoom` fails but `internalResult` is still valid.
+    /// Reads a fixed-size value across span boundaries, using the stored scratch space and refilling as needed.
+    ///
+    /// Call this method when `hasRoom` fails but `internalResult` is still valid.
     private mutating func readFragmented<T: BitwiseCopyable>(_ value: inout T) throws(DeserializationError) {
         let length = MemoryLayout<T>.size
         precondition(length <= 16)
@@ -180,8 +180,7 @@ public struct Deserializer<Factory: DeserializerSpanFactory & ~Copyable & ~Escap
         value = scratchSpace.span.bytes.unsafeLoadUnaligned(as: T.self)
     }
 
-    /// Read a fixed-size value across span boundaries, with optional
-    /// network-to-host byte order conversion.
+    /// Reads a fixed-size value across span boundaries, with optional network-to-host byte order conversion.
     private mutating func readFragmented<T: BitwiseCopyable & FixedWidthInteger>(
         _ value: inout T,
         networkByteOrder: Bool
@@ -192,8 +191,10 @@ public struct Deserializer<Factory: DeserializerSpanFactory & ~Copyable & ~Escap
         }
     }
 
-    /// Read a fixed-size BitwiseCopyable value, using the fast path when
-    /// the current span has enough data, or falling back to readFragmented.
+    /// Reads a fixed-size, bitwise-copyable value, choosing the fast or fragmented path.
+    ///
+    /// Reads a fixed-size `BitwiseCopyable` value, using the fast path when the current
+    /// span has enough data, or falling back to `readFragmented(_:)`.
     private mutating func readFixedSize<T: BitwiseCopyable>(_ value: inout T) throws(DeserializationError) {
         let length = MemoryLayout<T>.size
         guard hasRoom(length) else {
@@ -204,7 +205,9 @@ public struct Deserializer<Factory: DeserializerSpanFactory & ~Copyable & ~Escap
         try moveCursor(length)
     }
 
-    /// Read an optional fixed-size BitwiseCopyable value.
+    /// Reads an optional fixed-size, bitwise-copyable value.
+    ///
+    /// Reads an optional fixed-size `BitwiseCopyable` value.
     private mutating func readFixedSize<T: BitwiseCopyable & FixedWidthInteger>(
         _ value: inout T?
     ) throws(DeserializationError) {
@@ -213,8 +216,7 @@ public struct Deserializer<Factory: DeserializerSpanFactory & ~Copyable & ~Escap
         value = tempValue
     }
 
-    /// Read a fixed-size integer value with optional network-to-host
-    /// byte order conversion.
+    /// Reads a fixed-size integer value with optional network-to-host byte order conversion.
     private mutating func readFixedSize<T: BitwiseCopyable & FixedWidthInteger>(
         _ value: inout T,
         networkByteOrder: Bool
@@ -225,8 +227,7 @@ public struct Deserializer<Factory: DeserializerSpanFactory & ~Copyable & ~Escap
         }
     }
 
-    /// Read an optional fixed-size integer value with optional network-to-host
-    /// byte order conversion.
+    /// Reads an optional fixed-size integer value with optional network-to-host byte order conversion.
     private mutating func readFixedSize<T: BitwiseCopyable & FixedWidthInteger>(
         _ value: inout T?,
         networkByteOrder: Bool

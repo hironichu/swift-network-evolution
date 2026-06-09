@@ -53,11 +53,11 @@ public struct IPProtocol: NetworkProtocol {
     }
 
     public enum Version: UInt8 {
-        /// Allow any IP version
+        /// Allows any IP version.
         case any = 0
-        /// Use only IP version 4 (IPv4)
+        /// Uses only IP version 4 (IPv4).
         case v4 = 4
-        /// Use only IP version 6 (IPv6)
+        /// Uses only IP version 6 (IPv6).
         case v6 = 6
     }
 
@@ -68,13 +68,13 @@ public struct IPProtocol: NetworkProtocol {
     }
 
     public enum ECN: UInt8 {
-        /// Non ECN-Capable Transport
+        /// Non-ECN-capable transport.
         case nonECT = 0
-        /// ECN Capable Transport (0)
+        /// ECN-capable transport (0).
         case ect0 = 1
-        /// ECN Capable Transport (1)
+        /// ECN-capable transport (1).
         case ect1 = 2
-        /// Congestion Experienced
+        /// Congestion experienced.
         case ce = 3
 
         init(_ rawValue: UInt8) {

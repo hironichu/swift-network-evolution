@@ -15,7 +15,7 @@
 #if (!os(Linux) || (!NETWORK_PRIVATE && canImport(Darwin))) && !NETWORK_EMBEDDED
 import Darwin
 
-/// Set of Darwin system APIs for interacting with the system resources
+/// A set of Darwin system APIs for interacting with the system resources.
 internal enum SystemResources {
 
     static func getFDLimit() -> UInt64 {

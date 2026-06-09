@@ -158,7 +158,7 @@ public enum QUICConnectionState: CustomStringConvertible {
 @available(Network 0.1.0, *)
 public final class QUICConnection: ManyToManyApplicationStreamProtocol,
     ManyToManyApplicationDatagramProtocol, ManyToManyOutboundDatagramProtocol,
-    StreamListenerHandler, HeterogenousManyToManyProtocolHandler, TimerSchedulable,
+    StreamListenerHandler, HeterogeneousManyToManyProtocolHandler, TimerSchedulable,
     ProtocolInstanceContainer
 {
     public var inboundFlowLinkage = InboundStreamFlowLinkage()

@@ -12,10 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Extension of System specifically for system resources
+/// An extension that adds system-resource APIs.
+///
+/// Extends `System` with system-resource functions.
 extension System {
 
-    /// Returns a valid FD limit or `nil` if none was obtained.
+    /// Returns the file-descriptor limit, if available.
+    ///
+    /// Returns `nil` if no limit was obtained.
     static func getFDLimit() -> UInt64? {
         let fdLimit = SystemResources.getFDLimit()
         return fdLimit > 0 ? fdLimit : nil

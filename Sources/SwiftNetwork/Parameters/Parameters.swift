@@ -64,14 +64,15 @@ public struct Parameters: Hashable, CustomStringConvertible {
     }
 
     public enum ExpiredDNSBehavior: Hashable, CustomStringConvertible {
-        /// Let the system determine whether or not to allow expired DNS answers
+        /// Lets the system determine whether to allow expired DNS answers.
         case systemDefault
-        /// Explicitly allow the use of expired DNS answers
+        /// Explicitly allows the use of expired DNS answers.
         case allow
-        /// Explicitly prohibit the use of expired DNS answers
+        /// Explicitly prohibits the use of expired DNS answers.
         case prohibit
-        /// Allow the use of expired DNS answers, and store answers in a persistent per-process cache.
-        /// This should only be set for hostnames whose resolutions are not expected to change across networks.
+        /// Allows the use of expired DNS answers and stores them in a persistent per-process cache.
+        ///
+        /// Set this only for host names whose resolutions don't change across networks.
         case persistent
 
         public var description: String {
@@ -85,17 +86,17 @@ public struct Parameters: Hashable, CustomStringConvertible {
     }
 
     public enum ServiceClass: UInt8, CustomStringConvertible {
-        /// Default priority traffic
+        /// Default-priority traffic.
         case bestEffort = 0
-        /// Bulk traffic, or traffic that can be de-prioritized behind foreground traffic
+        /// Bulk traffic, or traffic that can be deprioritized behind foreground traffic.
         case background = 1
-        /// Interactive video traffic
+        /// Interactive video traffic.
         case interactiveVideo = 2
-        /// Interactive voice traffic
+        /// Interactive voice traffic.
         case interactiveVoice = 3
-        /// Responsive data
+        /// Responsive data.
         case responsiveData = 4
-        /// Signaling
+        /// Signaling.
         case signaling = 5
 
         public var description: String {

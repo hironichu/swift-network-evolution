@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// Upper protocols are protocols that are closer to the application, and have a linkage to a lower protocol (toward the network)
+/// A protocol closer to the app, with a linkage to a lower protocol toward the network.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol UpperProtocolHandler<LowerProtocol>: ~Copyable, ProtocolInstance {
@@ -119,7 +119,7 @@ extension ProtocolInstanceReference {
 
 }
 
-/// Lower protocols are protocols that are closer to the network, and have a linkage to a upper protocol (toward the application)
+/// A protocol closer to the network, with a linkage to an upper protocol toward the app.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol LowerProtocolHandler<UpperProtocol>: ~Copyable, ProtocolInstance {

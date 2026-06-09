@@ -27,31 +27,41 @@ internal import os
 #endif
 
 enum ECNState {
-    /// App explicitly asked to disable ECN
+    /// The app explicitly asked to disable ECN.
     case disabled
 
-    /// Send 10 packets marked with ECT(0) or ECT(1) and move to validate
+    /// Sends a probe burst, then moves to the validate state.
+    ///
+    /// Sends 10 packets marked with `ECT(0)` or `ECT(1)`, then moves to the validate state.
     case probing
 
-    /// During probing, we reach this state if 1 or more packets have been successfully validated.
-    /// Used in establishment report to provide ECN state (before we have a chance to send 10 packets).
+    /// Indicates that one or more packets have been successfully validated during probing.
+    ///
+    /// The establishment report uses this state to report ECN status before 10 packets have been sent.
     case handshakeValidationSuccess
 
-    /// Optimistically send ECN capable packets in this state.
-    /// On receiving ACK_ECN, if validation succeeds: move to capable, else: move to failed.
+    /// Optimistically sends ECN-capable packets in this state.
+    ///
+    /// On receiving an ECN ACK, moves to capable if validation succeeds; otherwise, moves to failed.
     case validate
 
-    /// Validation succeeded, always send ECT(0) or ECT(1) packets in this state.
-    /// Continue validating on each received ACK_ECN. If validation fails, go to failed state.
+    /// Validation succeeded.
+    ///
+    /// Always sends `ECT(0)` or `ECT(1)` packets in this state.
+    /// Continues validating on each received `ACK_ECN`. If validation fails, transitions to the failed state.
     case capable
 
-    /// Either we disabled ECN or validation failed
+    /// Either ECN is disabled or validation failed.
     case unsupported
 
-    /// Packets sent with ECN were dropped. This state is propagated to establishment report.
+    /// Indicates that packets sent with ECN were dropped.
+    ///
+    /// The establishment report receives this state.
     case blackholed
 
-    /// Once we are in validate, mangling is detected if all sent packets were marked with CE
+    /// Indicates that mangling was detected.
+    ///
+    /// Once in the validate state, the system detects mangling if all sent packets are marked with CE.
     case manglingDetected
 
     var shouldNotUseECN: Bool {

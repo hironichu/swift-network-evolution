@@ -62,21 +62,25 @@ public final class NetworkContext: NetworkContextProtocol, @unchecked Sendable {
     }
 
     public protocol Scheduler: AnyObject {
-        /// Run an immediate task.  No assumptions are made about how the task will be run.
+        /// Runs an immediate task. No assumptions are made about how the task is run.
         func runImmediate(_ task: @escaping (() -> Void))
-        /// Schedule a task to be run after a delay of the given `milliseconds`, using a reference.
+        /// Schedules a task to run after a delay, using a reference.
+        ///
+        /// The `milliseconds` parameter specifies the delay before the task runs.
         func schedule(_ task: @escaping (() -> Void), milliseconds: Int64, reference: TimerReference)
-        /// Unschedule a task with a handle
+        /// Unschedules a task with a reference.
         func unschedule(reference: TimerReference)
-        /// Whether the current code is running in the scheduler
+        /// A Boolean value that indicates whether the current code is running in the scheduler.
         var runningInScheduler: Bool { get }
     }
 
-    /// Indicate the privacy level for the context. Public is good for contexts that will be used only with
-    /// endpoints that do not divulge information about what the user is doing such as a process that always connects
-    /// to the same server. Private will hide the endpoints involved in connections. This level is appropriate for a
-    /// browser, where hostnames would indicate a great deal of information about what a user is doing. Sensitive will
-    /// suppress all logging and is appropriate for something like private browsing.
+    /// Indicates the privacy level for the context.
+    ///
+    /// `publicLogs` is good for contexts used only with endpoints that don't divulge information
+    /// about what the app is doing, such as a process that always connects to the same server.
+    /// `privateLogs` hides the endpoints involved in connections; this level is appropriate for a
+    /// browser, where hostnames would indicate a great deal of information about what the app is doing.
+    /// `sensitiveLogs` suppresses all logging and is appropriate for something like private browsing.
     enum PrivacyLevel: Hashable, CustomStringConvertible {
         case publicLogs
         case privateLogs
@@ -340,20 +344,22 @@ extension NetworkContext {
         init(globals: Globals) {
             self.globals = globals
         }
-        /// Run an immediate task.  No assumptions are made about how the task will be run.
+        /// Runs an immediate task. No assumptions are made about how the task is run.
         func runImmediate(_ task: @escaping (() -> Void)) {
             globals.queue.async(execute: DispatchWorkItem(block: task))
         }
-        /// Schedule a task to be run after a delay of the given `milliseconds`, using a reference.
+        /// Schedules a task to run after a delay, using a reference.
+        ///
+        /// The `milliseconds` parameter specifies the delay before the task runs.
         func schedule(_ task: @escaping (() -> Void), milliseconds: Int64, reference: TimerReference) {
             let targetTime = DispatchTime.now() + DispatchTimeInterval.milliseconds(Int(milliseconds))
             globals.timerList.insert(targetTime: targetTime, reference: reference, task: task)
         }
-        /// Unschedule a task with a reference
+        /// Unschedules a task with a reference.
         func unschedule(reference: TimerReference) {
             globals.timerList.remove(for: reference)
         }
-        /// Whether the current code is running in the scheduler
+        /// A Boolean value that indicates whether the current code is running in the scheduler.
         var runningInScheduler: Bool {
             // TODO: Not supported by DispatchQueue
             fatalError("Unsupported")

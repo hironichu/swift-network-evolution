@@ -399,9 +399,6 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
     }
 
     /// Updates alpha after receiving acknowledgments.
-    ///
-    /// Call this only if an AQM is present on the path, and only with
-    /// non-zero values for `new_packets_acked` and `new_packets_marked`.
     private mutating func pragueUpdateAlpha(
         largestSentPN: Int64,
         largestAckedPN: Int64,

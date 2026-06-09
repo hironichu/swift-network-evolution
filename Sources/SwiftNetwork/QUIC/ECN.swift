@@ -42,7 +42,7 @@ enum ECNState {
 
     /// Optimistically sends ECN-capable packets in this state.
     ///
-    /// On receiving an ECN ACK, moves to capable if validation succeeds; otherwise, moves to failed.
+    /// On receiving `ACK_ECN`, moves to capable if validation succeeds; otherwise, moves to failed.
     case validate
 
     /// Validation succeeded.

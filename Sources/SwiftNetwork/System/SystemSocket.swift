@@ -163,7 +163,6 @@ class SystemSocket {
     ///
     /// Wraps a call to the system `bind` function.
     public func bindSocket(address: any IPAddress, bytes: Int) throws {
-        // TODO: Change this to use Endpoint when they become available.
         guard self.sockfd > 0 else {
             Logger.system.error("File descriptor is bad, cannot bind socket")
             throw NetworkError.posix(EINVAL)

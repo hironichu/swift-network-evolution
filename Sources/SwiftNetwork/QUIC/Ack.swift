@@ -497,7 +497,7 @@ final class Ack: PrefixedLoggable, TimerUser {
                 setAckFrame: connection.scheduleAckFrame,
                 ecn: connection.ecn
             ) {
-                connection.sendFrames()
+                connection.sendFrames(delayedACK: true)
             }
         }
 
@@ -718,7 +718,7 @@ final class Ack: PrefixedLoggable, TimerUser {
         )
     }
 
-    private func scheduleDelayedAck() {
+    func scheduleDelayedAck() {
         // ACK timer is already scheduled
         if timerScheduled {
             return

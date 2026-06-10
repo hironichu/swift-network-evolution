@@ -413,15 +413,21 @@ final class SwiftNetworkQUICEarlyDataTests: NetTestCase {
                 let receiveExpectation = XCTestExpectation()
                 context.async {
                     Logger.test.info("Trying to read data")
-                    for _ in 0..<10 {
+                    func attemptServerRead() {
                         if pairedPathsArray.first?.transferPackets() == 0 {
-                            break
+                            // Wait for new writes from the client to be sent
+                            context.async {
+                                attemptServerRead()
+                            }
+                            return
                         }
+                        Logger.test.info("Trying to read data")
                         if let readData = serverUpperHarness?.upperHarnesses.first?.read() {
                             XCTAssertEqual(readData, dataToSend)
                             receiveExpectation.fulfill()
                         }
                     }
+                    attemptServerRead()
                 }
                 wait(for: [receiveExpectation], timeout: 5.0)
             }

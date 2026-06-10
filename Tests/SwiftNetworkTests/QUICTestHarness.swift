@@ -990,7 +990,7 @@ final class QUICTestHarness {
                     generator = TestDataGenerator(
                         blockSize: blockSize,
                         numberOfBlocks: blockCount,
-                        uniqueBits: UInt8(index),
+                        uniqueBits: UInt8(clamping: index),
                         sendFIN: sendFIN
                     )
                 }

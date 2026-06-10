@@ -69,11 +69,12 @@ public struct StreamDeserializationBuilder<
 @available(Network 0.1.0, *)
 public protocol StreamDeserializerState: ~Copyable {
 
-    /// An associated type that defines comparable identifiers for state machine steps.
-    /// These identifiers are used for looping and jumping states when deserializing.
+    /// An associated type that defines hashable identifiers for state-machine steps.
+    ///
+    /// Use these identifiers to loop and jump between states during deserialization.
     associatedtype StateMachineStepIdentifier: Hashable
 
-    /// Creates a new default state.
+    /// Creates a default state.
     init()
 }
 

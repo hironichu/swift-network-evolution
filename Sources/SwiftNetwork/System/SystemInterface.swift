@@ -24,7 +24,9 @@ internal import errno_h
 #endif
 #endif
 
-/// Extension of System specifically for system interfaces
+/// An extension that adds system-interface APIs.
+///
+/// Extends `System` with system-interface functions.
 extension System {
 
     static func interfaceGetMTU(socket: Int32, name: String) throws -> Int {

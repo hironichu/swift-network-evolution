@@ -16,14 +16,17 @@
 
 enum SafeAccess {
 
-    /// Access a c structure from a raw buffer pointer.
-    /// NOTE: The structure will be loaded aligned and will return nil if misaligned.
+    /// Accesses a C structure from a raw buffer pointer.
+    ///
+    /// The structure loads aligned, and the method returns `nil` if the buffer is misaligned.
     ///
     /// Example usage:
+    /// ```swift
     /// let headerBuffer = UnsafeRawBufferPointer(pointer)
     /// guard let cstruct = self.loadCStructure(buffer: headerBuffer, type: cstruct.self) else {
     ///    continue
     /// }
+    /// ```
     static func loadCStructure<T>(buffer: UnsafeRawBufferPointer, type: T.Type) -> T? {
 
         let size = MemoryLayout<T>.size

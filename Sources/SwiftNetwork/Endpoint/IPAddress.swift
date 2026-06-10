@@ -12,18 +12,18 @@
 //
 //===----------------------------------------------------------------------===//
 
-/// IPAddress is just a stub for now.
+/// A stub protocol that represents an IP address.
 protocol IPAddress: Sendable {
 
-    /// Create IPAddress from raw bytes
+    /// Creates an IP address from raw bytes.
     init?(_ bytes: [UInt8])
 
-    /// Indicates the address family used for the IPAddress type
+    /// The address family used by this IP address.
     var addressFamily: AddressFamily { get }
 
-    /// Indicates if this address is loopback
+    /// A Boolean value that indicates whether this address is a loopback address.
     var isLoopback: Bool { get }
 
-    /// Indicates if this address is multicast
+    /// A Boolean value that indicates whether this address is a multicast address.
     var isMulticast: Bool { get }
 }

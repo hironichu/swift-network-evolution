@@ -27,13 +27,11 @@ internal import Logging
 internal import os
 #endif
 
-/// RTT independence control type
+/// Indicates the RTT independence control type.
 enum RTTControlType: UInt8 {
-    /// Trade off some throughput balance at very low RTTs for scalability,
-    /// i.e. to get non-zero marks per RTT
+    /// Trades off some throughput balance at very low RTTs for scalability — that is, to get non-zero marks per RTT.
     case balanceRateScalable
-    /// Get near perfect throughput equivalence at the cost of losing
-    /// scalability for very low RTTs
+    /// Gets near-perfect throughput equivalence at the cost of losing scalability for very low RTTs.
     case rateEquivalence
 }
 
@@ -88,12 +86,17 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
     private var reducedDueToCE = false
     private var rttControl: RTTControlType = .rateEquivalence
 
-    /// Largest sent PN set at the start of the round for alpha;
-    /// different from the common state that tracks round for CWR
+    /// The largest sent packet number set at the start of the round for alpha.
+    ///
+    /// Differs from the common state, which tracks the round for CWR.
     private var largestSentPNForAlpha: Int64 = 0
-    /// Scaled value of DCTCP.alpha
+    /// The scaled value of the DCTCP alpha.
+    ///
+    /// Stores the scaled `DCTCP.alpha`.
     private var scaledAlpha: UInt64 = 0
-    /// AI.alpha used after CE for additive increase
+    /// The additive-increase alpha used after CE.
+    ///
+    /// Stores the `AI.alpha` value used after CE for additive increase.
     private var alphaAI: UInt64 = 0
 
     // Local link congestion info
@@ -133,10 +136,12 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
         logState(qlog: qlog, state: .slowStart, trigger: nil)
     }
 
-    /// K is the time period(s) that W_cubic(t) function takes to increase
-    /// the current window size to W_max if there are no further
-    /// congestion events. Compute the cubic K using,
-    /// K = cubic_root(W_max(1-ß)/C)
+    /// Computes the cubic K factor for the current congestion window.
+    ///
+    /// `K` is the time period(s) that the `W_cubic(t)` function takes to increase
+    /// the current window size to `W_max` if there are no further
+    /// congestion events. Computes the cubic `K` using
+    /// `K = cubic_root(W_max(1-ß)/C)`.
     private mutating func setCubicK(mss: Int) {
         guard cubicMaxCongestionWindow != 0 else {
             cubicK = 0
@@ -198,7 +203,7 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
         )
     }
 
-    /// Handle an ACK in congestion avoidance phase after packet loss
+    /// Handles an ACK in the congestion-avoidance phase after packet loss.
     private mutating func cubicProcessAckCA(
         bytesAcked: UInt64,
         smoothedRTT: NetworkDuration,
@@ -238,9 +243,10 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
         }
     }
 
-    /// RTT independence using square of RTT ratio to achieve rate fairness.
-    /// Note that this loses scalable marking (1 or 2 marks per RTT) for low RTT.
-    /// For additive increase, alpha = (RTT / REF_RTT) ^ 2
+    /// Computes RTT independence using the square of the RTT ratio to achieve rate fairness.
+    ///
+    /// Note that this loses scalable marking (one or two marks per RTT) for low RTT.
+    /// For additive increase, `alpha = (RTT / REF_RTT) ^ 2`.
     private mutating func pragueAIAlphaRate(sRTT: NetworkDuration) {
         if sRTT > Prague.referenceRTTRate {
             alphaAI = 1 << Prague.congestionWindowShift
@@ -255,8 +261,9 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
         alphaAI = (numer + (divisor >> 1)) / divisor
     }
 
-    /// Achieve a balance between throughput equivalence and scalable marking every RTT.
-    /// For additive increase, alpha = C * lg(R/R0+2) / lg(R0/R+2)
+    /// Achieves a balance between throughput equivalence and scalable marking every RTT.
+    ///
+    /// For additive increase, `alpha = C * lg(R/R0+2) / lg(R0/R+2)`.
     private mutating func pragueAIAlphaScalable(sRTT: NetworkDuration) {
         // If we don't have a SRTT, set to 1
         if sRTT == .zero {
@@ -278,7 +285,7 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
         #endif
     }
 
-    /// Handle an ACK in congestion avoidance phase after the decrease happened due to CE
+    /// Handles an ACK in the congestion-avoidance phase after the decrease caused by CE.
     private mutating func pragueCAAfterCE(bytesAcked: UInt64, mss: Int) {
         var increase = bytesAcked * UInt64(mss) * alphaAI
         increase = (increase + (congestionWindow >> 1)) / congestionWindow
@@ -356,7 +363,7 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
         logState(qlog: qlog, state: .recovery, trigger: nil)
     }
 
-    /// An ACK was received with new CE counts, enter CWR and stay for 1 RTT.
+    /// Enters CWR for one RTT after receiving an ACK with new CE counts.
     private mutating func pragueCWR(
         largestAckedSentTime: NetworkClock.Instant,
         mss: Int,
@@ -391,8 +398,7 @@ struct Prague: CongestionControlProtocol, CubicLikeProtocol {
         logState(qlog: qlog, state: .cwr, trigger: nil)
     }
 
-    /// Call only if some AQM is present on the path and with
-    /// non-zero values for new_packets_acked and new_packets_marked
+    /// Updates alpha after receiving acknowledgments.
     private mutating func pragueUpdateAlpha(
         largestSentPN: Int64,
         largestAckedPN: Int64,

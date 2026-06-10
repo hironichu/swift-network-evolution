@@ -19,35 +19,35 @@ internal import Logging
 internal import os
 #endif
 
-/// Interface types represent the underlying media for a network link
+/// The type of underlying media for a network link.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public enum InterfaceType: Int, Sendable, CaseIterable {
-    /// A virtual or otherwise unknown interface type
+    /// A virtual or otherwise unknown interface type.
     case other = 0
-    /// A Wi-Fi link
+    /// A Wi-Fi link.
     case wifi = 2
-    /// A Cellular link
+    /// A cellular link.
     case cellular = 3
-    /// A Wired Ethernet link
+    /// A wired Ethernet link.
     case wiredEthernet = 4
-    /// The Loopback Interface
+    /// The loopback interface.
     case loopback = 1
 }
 
-/// Interface subtypes represent the underlying media subtype for a network link
+/// The subtype of underlying media for a network link.
 @_spi(Essentials)
 @available(Network 0.1.0, *)
 public enum InterfaceSubtype: Int, Sendable, CaseIterable {
-    /// A virtual or otherwise unknown interface subtype
+    /// A virtual or otherwise unknown interface subtype.
     case other = 0
-    /// A Wi-Fi Infrastructure subtype
+    /// A Wi-Fi infrastructure subtype.
     case wifiInfrastructure = 3
-    /// A Wi-Fi AWDL subtype
+    /// A Wi-Fi AWDL subtype.
     case wifiAWDL = 4
-    /// A Coprocessor subtype
+    /// A coprocessor subtype.
     case coprocessor = 6
-    /// A Companion subtype
+    /// A companion subtype.
     case companion = 7
 }
 

@@ -16,7 +16,7 @@
 import Glibc
 internal import SwiftNetworkLinuxShim
 
-/// Set of Linux system APIs for interacting with the system resources
+/// A set of Linux system APIs for interacting with the system resources.
 internal enum SystemResources {
 
     static func getFDLimit() -> UInt64 {

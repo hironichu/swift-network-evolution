@@ -19,7 +19,7 @@ internal import os
 import Darwin
 #endif
 
-/// Set of Darwin system APIs for interacting with the system interface
+/// A set of Darwin system APIs for interacting with the system interface.
 internal enum SystemInterface {
 
     enum Constants {
@@ -40,7 +40,9 @@ internal enum SystemInterface {
         static let IFF_RUNNING: UInt32 = 0x0000_0040
     }
 
-    /// Get MTU from the interface using ioctl
+    /// Gets the MTU from the interface.
+    ///
+    /// Uses `ioctl` to fetch the value.
     static func interfaceGetMTU(socket: Int32, name: String) throws -> Int {
         if name.isEmpty {
             return 65535
@@ -61,7 +63,9 @@ internal enum SystemInterface {
         }
     }
 
-    /// Check to see if an interface has a specific flag.  For example, UP,RUNNING,BROADFAST,MULTICAST
+    /// Returns a Boolean value that indicates whether an interface has a specific flag.
+    ///
+    /// For example, `UP`, `RUNNING`, `BROADCAST`, or `MULTICAST`.
     static func interfaceHasFlag(socket: Int32, name: String, flag: Interface.Details.Flags) throws -> Bool {
         if name.isEmpty {
             return false
@@ -94,7 +98,7 @@ internal enum SystemInterface {
         }
     }
 
-    /// Get functional type flags for the interface
+    /// Returns the functional type flags for the interface.
     static func getFunctionalType(socket: Int32, name: String) throws -> UInt32 {
         if name.isEmpty {
             return 0
@@ -115,7 +119,7 @@ internal enum SystemInterface {
         }
     }
 
-    /// Get all of the interface flags for a specified interface
+    /// Returns all of the interface flags for the specified interface.
     static func interfaceGetInterfaceFlags(socket: Int32, name: String) throws -> UInt32 {
         if name.isEmpty {
             return 0
@@ -136,7 +140,7 @@ internal enum SystemInterface {
             return UInt32(interfaceFlags)
         }
     }
-    /// Get all of the interface type for a specified interface
+    /// Returns the interface type for the specified interface.
     static func interfaceGetInterfaceType(socket: Int32, name: String) throws -> InterfaceType {
         var interfaceType = InterfaceType.other
         // Check for interface type using SIOCGIFFUNCTIONALTYPE
@@ -153,7 +157,7 @@ internal enum SystemInterface {
         return interfaceType
     }
 
-    /// Get interface sub type
+    /// Returns the interface subtype.
     static func interfaceGetInterfaceSubType(socket: Int32, name: String) throws -> InterfaceSubtype {
         var interfaceSubtype = InterfaceSubtype.other
         if socket == 0 {
@@ -172,7 +176,7 @@ internal enum SystemInterface {
         return interfaceSubtype
     }
 
-    /// Get interface name from index
+    /// Returns the interface name from the index.
     static func interfaceGetNameFromIndex(index: UInt32) throws -> String? {
         guard index > 0 else {
             Logger.interface.error("Invalid index for interface: 0")

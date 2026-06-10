@@ -21,7 +21,7 @@ public struct NetworkEventDomain: Sendable, Hashable, CustomStringConvertible {
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
-/// An extensible event reported by a lower protocol to upper protocols
+/// An extensible event that a lower protocol reports to upper protocols.
 public struct NetworkProtocolEvent: Sendable, Equatable, CustomStringConvertible {
     enum InternalEvent: Equatable {
         case viabilityChanged(viable: Bool)
@@ -106,7 +106,7 @@ public struct NetworkProtocolEvent: Sendable, Equatable, CustomStringConvertible
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
-/// An extensible event from the application, sent from upper protocols to lower protocols
+/// An extensible event from the app, sent from upper protocols to lower protocols.
 public struct ApplicationEvent: Sendable, Equatable, CustomStringConvertible {
     enum InternalEvent: Equatable {
         case dataStall

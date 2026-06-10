@@ -14,27 +14,27 @@
 
 public struct IPv4Address: IPAddress, Hashable, CustomDebugStringConvertible {
 
-    /// The IPv4 any address used for listening
+    /// The IPv4 "any" address used for listening.
     public static var any: IPv4Address {
         IPv4Address(UInt32(0x0000_0000).bigEndian)
     }
 
-    /// The IPv4 broadcast address used to broadcast to all hosts
+    /// The IPv4 broadcast address used to broadcast to all hosts.
     public static var broadcast: IPv4Address {
         IPv4Address(UInt32(0xffff_ffff).bigEndian)
     }
 
-    /// The IPv4 loopback address
+    /// The IPv4 loopback address.
     public static var loopback: IPv4Address {
         IPv4Address(UInt32(0x7f00_0001).bigEndian)
     }
 
-    /// Indicates if this IPv4 address is loopback (127.0.0.1)
+    /// A Boolean value that indicates whether this IPv4 address is the loopback address (127.0.0.1).
     public var isLoopback: Bool {
         self == IPv4Address.loopback
     }
 
-    /// Indicates if this IPv4 address is multicast
+    /// A Boolean value that indicates whether this IPv4 address is a multicast address.
     public var isMulticast: Bool {
         let v4WireAddress = self.address
         let mask = (0xF000_0000 as UInt32).bigEndian
@@ -78,7 +78,7 @@ public struct IPv4Address: IPAddress, Hashable, CustomDebugStringConvertible {
         self.address = rawValue
     }
 
-    /// An IPv4 address as a byte array
+    /// An IPv4 address as a byte array.
     public init?(_ bytes: [UInt8]) {
         guard bytes.count == MemoryLayout<UInt32>.size else {
             return nil

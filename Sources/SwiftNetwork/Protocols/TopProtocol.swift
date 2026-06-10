@@ -21,25 +21,29 @@ internal import os
 
 // MARK: - Top Protocol Adoption
 
-/// Top protocols are the Top of a stack, and only have an lower protocol.
+/// Top protocols sit at the top of a stack and have only a lower protocol.
+///
 /// Conform to `TopStreamProtocol` or `TopDatagramProtocol`.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol TopProtocolHandler: ~Copyable, InboundDataHandler {
 
-    /// The type of lower protocol (towards the network) that can be attached
+    /// The type of lower protocol (toward the network) that you can attach.
     var lower: LowerProtocol { get set }
 
-    /// A function called when the lower protocol has connected.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol connects.
+    ///
+    /// Protocols can implement this function to customize behavior.
     func handleConnectedEvent()
 
-    /// A function called when the lower protocol has disconnected.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol disconnects.
+    ///
+    /// Protocols can implement this function to customize behavior.
     func handleDisconnectedEvent(error: NetworkError?)
 
-    /// A function called when some lower protocol has sent an event.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when a lower protocol sends an event.
+    ///
+    /// Protocols can implement this function to customize behavior.
     func handleNetworkProtocolEvent(_ event: NetworkProtocolEvent)
 }
 
@@ -47,33 +51,35 @@ public protocol TopProtocolHandler: ~Copyable, InboundDataHandler {
 @available(Network 0.1.0, *)
 public protocol TopDatapathProtocol: ~Copyable, TopProtocolHandler where LowerProtocol: OutboundDataLinkage {
 
-    /// A function called when the lower protocol has inbound data available to read.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol has inbound data available to read.
+    ///
+    /// Protocols can implement this function to customize behavior.
     func handleInboundDataAvailableEvent()
 
-    /// A function called when the lower protocol has outbound room available to sent.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol has outbound room available to send.
+    ///
+    /// Protocols can implement this function to customize behavior.
     func handleOutboundRoomAvailableEvent()
 }
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 extension TopProtocolHandler where Self: ~Copyable {
-    /// A function to call to indicate to request the lower protocol to start connecting.
+    /// Requests that the lower protocol start connecting.
     public func invokeConnect() {
         fromExternal {
             lower.invokeConnect(self.reference)
         }
     }
 
-    /// A function to call to indicate to request the lower protocol to disconnect.
+    /// Requests that the lower protocol disconnect.
     public func invokeDisconnect(error: NetworkError?) {
         fromExternal {
             lower.invokeDisconnect(self.reference, error: error)
         }
     }
 
-    /// A function to call to indicate to detach the lower protocol.
+    /// Detaches the lower protocol.
     public mutating func invokeDetach() throws(NetworkError) {
         try fromExternal { () throws(NetworkError) in
             try lower.invokeDetach(self.reference)
@@ -81,14 +87,14 @@ extension TopProtocolHandler where Self: ~Copyable {
         lower = .init(reference: .init())
     }
 
-    /// A function to call to signal an application-level event to lower protocols.
+    /// Signals an application-level event to lower protocols.
     public func invokeApplicationEvent(_ event: ApplicationEvent) {
         fromExternal {
             lower.invokeApplicationEvent(self.reference, event: event)
         }
     }
 
-    /// A function to call to access protocol metadata from a lower protocol.
+    /// Accesses protocol metadata from a lower protocol.
     public func invokeGetMetadata<P: NetworkProtocol>() -> ProtocolMetadata<P>? {
         fromExternal {
             lower.invokeGetMetadata(self.reference)
@@ -97,45 +103,47 @@ extension TopProtocolHandler where Self: ~Copyable {
     }
 }
 
-/// Top protocol with an upper stream linkage
+/// Top protocol with a lower stream linkage.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol TopStreamProtocol: ~Copyable, TopDatapathProtocol, InboundStreamHandler
 where LowerProtocol == OutboundStreamLinkage {
-    /// A function called when the lower protocol sent an event that inbound stream data is aborted.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol reports that inbound stream data is aborted.
+    ///
+    /// Protocols can implement this function to customize behavior.
     func handleInboundAbortedEvent(error: NetworkError?)
 
-    /// A function called when the lower protocol sent an event that outbound stream data is aborted.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol reports that outbound stream data is aborted.
+    ///
+    /// Protocols can implement this function to customize behavior.
     func handleOutboundAbortedEvent(error: NetworkError?)
 }
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 extension TopStreamProtocol where Self: ~Copyable {
-    /// A function to receive stream data from the lower protocol.
+    /// Receives stream data from the lower protocol.
     public func invokeReceiveStreamData(minimumBytes: Int, maximumBytes: Int) throws(NetworkError) -> FrameArray? {
         try fromExternal { () throws(NetworkError) in
             try lower.invokeReceiveStreamData(self.reference, minimumBytes: minimumBytes, maximumBytes: maximumBytes)
         }
     }
 
-    /// A function to check how much stream data may be sent to the lower protocol.
+    /// Returns the number of bytes of stream data you can send to the lower protocol.
     public func invokeGetOutboundStreamDataRoomAvailable() throws(NetworkError) -> Int {
         try fromExternal { () throws(NetworkError) in
             try lower.invokeGetOutboundStreamDataRoomAvailable(self.reference)
         }
     }
 
-    /// A function to send stream data to the lower protocol.
+    /// Sends stream data to the lower protocol.
     public func invokeSendStreamData(_ streamData: consuming FrameArray) throws(NetworkError) {
         try fromExternal(streamData) { streamData throws(NetworkError) in
             try lower.invokeSendStreamData(self.reference, streamData: streamData)
         }
     }
 
-    /// A function to send early stream data to the lower protocol.
+    /// Sends early stream data to the lower protocol.
     public func invokeSendEarlyStreamData(_ streamData: consuming FrameArray) throws(NetworkError) {
         try fromExternal(streamData) { streamData throws(NetworkError) in
             try lower.invokeSendEarlyStreamData(self.reference, streamData: streamData)
@@ -143,7 +151,7 @@ extension TopStreamProtocol where Self: ~Copyable {
     }
 }
 
-/// Top protocol with an upper datagram linkage
+/// Top protocol with a lower datagram linkage.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol TopDatagramProtocol: ~Copyable, TopDatapathProtocol, InboundDatagramHandler
@@ -154,14 +162,14 @@ where LowerProtocol == OutboundDatagramLinkage {
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 extension TopDatagramProtocol where Self: ~Copyable, Self: ~Copyable {
-    /// A function to receive datagrams from the lower protocol.
+    /// Receives datagrams from the lower protocol.
     public func invokeReceiveDatagrams(maximumDatagramCount: Int) throws(NetworkError) -> FrameArray? {
         try fromExternal { () throws(NetworkError) in
             try lower.invokeReceiveDatagrams(self.reference, maximumDatagramCount: maximumDatagramCount)
         }
     }
 
-    /// A function to get datagram memory to write into from the lower protocol.
+    /// Returns datagram memory you can write into, from the lower protocol.
     public func invokeGetDatagramsToSend(
         maximumDatagramCount: Int,
         minimumDatagramSize: Int
@@ -175,7 +183,9 @@ extension TopDatagramProtocol where Self: ~Copyable, Self: ~Copyable {
         }
     }
 
-    /// A function to send datagrams previously retrieved with `invokeGetDatagramsToSend`.
+    /// Sends previously retrieved datagrams to the lower protocol.
+    ///
+    /// Sends datagrams previously retrieved with `invokeGetDatagramsToSend`.
     public func invokeSendDatagrams(_ datagrams: consuming FrameArray) throws(NetworkError) {
         try fromExternal(datagrams) { datagrams throws(NetworkError) in
             try lower.invokeSendDatagrams(self.reference, datagrams: datagrams)

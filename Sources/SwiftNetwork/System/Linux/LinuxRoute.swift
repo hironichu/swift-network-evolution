@@ -17,7 +17,7 @@ import Glibc
 internal import Logging
 internal import SwiftNetworkLinuxShim
 
-/// Set of Linux system APIs for interacting with the system interface
+/// A set of Linux system APIs for interacting with the system interface.
 internal enum SystemRoute {
 
     enum Constants {
@@ -222,9 +222,11 @@ internal enum SystemRoute {
         }
     }
 
-    /// From a routing table buffer parse out multiple `rtattr` and append them to an array.
-    /// Note that the buffer passed in here should only represent the buffer of the rtattr data and not the rest of the buffer.
-    ///  https://man7.org/linux/man-pages/man7/rtnetlink.7.html
+    /// Parses routing-table attributes and appends them to an array.
+    ///
+    /// Parses multiple `rtattr` values from a routing-table buffer.
+    /// The buffer passed in must represent only the `rtattr` data, not the rest of the buffer.
+    /// See https://man7.org/linux/man-pages/man7/rtnetlink.7.html
     internal static func parseRouteAttributes(
         buffer: UnsafeBufferPointer<UInt8>,
         totalAttributeBytesSize: Int,
@@ -288,8 +290,10 @@ internal enum SystemRoute {
         return attributes
     }
 
-    /// Perform a routing table lookup using NLM_F_REQUEST and RTM_GETADDR.
-    /// The result of the query will hand back the entire routing table along with ifaddrmsg
+    /// Performs a routing-table lookup.
+    ///
+    /// Performs the lookup using `NLM_F_REQUEST` and `RTM_GETADDR`.
+    /// The query returns the entire routing table along with the `ifaddrmsg`.
     static func routeGetInterfaceIndex(dst: any IPAddress, scopedIndex: UInt32 = 0) throws -> UInt32 {
 
         var ifIndex: UInt32 = 0

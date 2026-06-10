@@ -771,10 +771,11 @@ struct Protector: ~Copyable, PrefixedLoggable {
         swap(&readFramer[keyState.rawValue], &writeFramer[keyState.rawValue])
     }
 
-    /// Prepare a nonce from the given iv bytes
+    /// Prepares a nonce from the given IV bytes.
     ///
-    /// Parameters:
-    ///   - nonce: must have nonce.byteCount == iv.byteCount
+    /// - Parameters:
+    ///   - iv: The IV used to derive the nonce.
+    ///   - packetNumber: The packet number XOR'd into the right side of the IV.
     @inline(__always)
     private static func prepareNonce(
         iv: ProtectorIV,
@@ -1422,8 +1423,9 @@ extension MutableRawSpan {
 }
 
 extension Array where Element == UInt8 {
-    /// Copy of the bytes of the given raw span into this array. The span
-    /// must have exactly count bytes in it.
+    /// Copies the bytes of the given raw span into this array.
+    ///
+    /// The span must contain exactly `count` bytes.
     init(copying bytes: RawSpan) {
         self.init(unsafeUninitializedCapacity: bytes.byteCount) { buffer, initializedCount in
             for i in 0..<bytes.byteCount {

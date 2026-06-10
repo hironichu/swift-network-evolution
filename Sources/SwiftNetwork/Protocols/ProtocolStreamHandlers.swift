@@ -21,51 +21,60 @@ internal import os
 
 // MARK: Automatic Stream Processing
 
-/// Add conformance to `AutomaticLowerStreamProcessing` to automatically send and receive stream data
-/// from lower protocols.
+/// A protocol for automatically sending and receiving stream data with lower protocols.
+///
+/// Add conformance to `AutomaticLowerStreamProcessing` to automatically send and receive
+/// stream data from lower protocols.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol AutomaticLowerStreamProcessing: ~Copyable, InboundStreamHandler {
     var lower: LowerProtocol { get set }
 
-    /// A queue of stream data that will be sent to the lower protocol.
-    /// NOTE: Protocols generally do not need to access this directly.
+    /// A queue of stream data the framework sends to the lower protocol.
+    ///
+    /// Protocols generally don't need to access this directly.
     /// Instead, call `addToLowerSendQueue`.
     var lowerSendQueue: FrameArray { get set }
 
     /// A queue of datagrams that have been received from the lower protocol.
-    /// NOTE: Protocols should access frames from this queue in response
+    ///
+    /// Protocols should access frames from this queue in response
     /// to the `serviceLowerReceiveQueue` call.
     var lowerReceiveQueue: FrameArray { get set }
 
-    /// A function called when the lower protocol has added stream data to
+    /// A function the framework calls when the lower protocol has added stream data to
     /// `lowerReceiveQueue`.
-    /// NOTE: Protocols should implement this function to customize behavior
+    ///
+    /// Protocols should implement this function to customize behavior.
     func serviceLowerReceiveQueue()
 }
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 extension AutomaticLowerStreamProcessing where Self: ~Copyable {
-    /// A function to call to add stream data to `lowerSendQueue`
+    /// Adds stream data to the lower send queue.
+    ///
+    /// Appends frames to `lowerSendQueue`.
     public mutating func addToLowerSendQueue(_ streamData: consuming FrameArray) throws(NetworkError) {
         lowerSendQueue.add(frames: streamData)
     }
 
-    /// A function to call to indicate to the lower protocol that stream data
-    /// has been added to the `lowerSendQueue`.
+    /// Indicates to the lower protocol that stream data has been added to the send queue.
+    ///
+    /// Drains `lowerSendQueue` to the lower protocol.
     public mutating func serviceLowerSendQueue() {
         guard !lowerSendQueue.isEmpty else { return }
         try? lower.invokeSendStreamData(reference, streamData: lowerSendQueue.drainArray())
     }
 
-    /// A function to call to indicate that stream data should be read
-    /// from the lower protocol.
+    /// Indicates that stream data should be read from the lower protocol.
     public mutating func resumeReadingInboundStreamData() {
         _readInboundStreamData()
     }
 }
 
+/// A protocol for automatically processing stream data from upper protocols.
+///
 /// Add conformance to `AutomaticUpperStreamProcessing` to automatically process stream data
 /// from upper protocols.
 @_spi(ProtocolProvider)
@@ -74,44 +83,51 @@ public protocol AutomaticUpperStreamProcessing: ~Copyable, OutboundStreamHandler
     var upper: UpperProtocol { get set }
 
     /// A queue of stream data that has been sent by the upper protocol.
-    /// NOTE: Protocols should access frames from this queue in response
+    ///
+    /// Protocols should access frames from this queue in response
     /// to the `serviceUpperSendQueue` call.
     var upperSendQueue: FrameArray { get set }
 
-    /// A function called when the upper protocol has added stream data to
+    /// A function the framework calls when the upper protocol has added stream data to
     /// `upperSendQueue`.
-    /// NOTE: Protocols should implement this function to customize behavior
+    ///
+    /// Protocols should implement this function to customize behavior.
     func serviceUpperSendQueue()
 
-    /// A value to set to cap the maximum amount of stream data that is allowed
-    /// to be pending in the `upperSendQueue`.
+    /// The maximum amount of stream data allowed to be pending in the upper send queue.
+    ///
+    /// Caps the total bytes pending in `upperSendQueue`.
     var maximumStreamDataSize: Int { get set }
 
-    /// A boolean to set if the upper protocol should be blocked from sending
-    /// stream data.
+    /// A Boolean value that indicates whether the upper protocol is blocked from sending stream data.
     var blockUpperSendQueue: Bool { get set }
 
-    /// A queue of stream data that will be delivered to the upper protocol.
-    /// NOTE: Protocols generally do not need to access this directly.
+    /// A queue of stream data the framework delivers to the upper protocol.
+    ///
+    /// Protocols generally don't need to access this directly.
     /// Instead, call `addToUpperReceiveQueue`.
     var upperReceiveQueue: FrameArray { get set }
 
-    /// A function called when the upper protocol has read stream data out of
+    /// A function the framework calls when the upper protocol has read stream data out of
     /// `upperReceiveQueue`.
-    /// NOTE: Protocols can implement this function to customize behavior
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func upperReceiveQueueDrainedBytes(_ bytes: Int)
 }
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 extension AutomaticUpperStreamProcessing where Self: ~Copyable {
-    /// A function to call to add stream data to `upperReceiveQueue`
+    /// Adds stream data to the upper receive queue.
+    ///
+    /// Appends frames to `upperReceiveQueue`.
     public mutating func addToUpperReceiveQueue(_ streamData: consuming FrameArray) throws(NetworkError) {
         upperReceiveQueue.add(frames: streamData)
     }
 
-    /// A function to call to indicate to the upper protocol that stream data
-    /// has been added to the `upperReceiveQueue`.
+    /// Indicates to the upper protocol that stream data has been added to the receive queue.
+    ///
+    /// Notifies the upper protocol that frames are available in `upperReceiveQueue`.
     public func serviceUpperReceiveQueue() {
         guard !upperReceiveQueue.isEmpty else { return }
         upper.deliverInboundDataAvailableEvent(reference)

@@ -14,40 +14,44 @@
 
 #if (NETWORK_EMBEDDED || NETWORK_STANDALONE) && !NETWORK_DRIVERKIT
 
-/// Set of Embedded system APIs for interacting with the system interface
+/// A set of embedded system APIs for interacting with the system interface.
 internal enum SystemInterface {
 
-    /// Get MTU from the intereface using ioctl
+    /// Gets the MTU from the interface.
+    ///
+    /// Uses `ioctl` to fetch the value.
     static func interfaceGetMTU(socket: Int32, name: String) throws -> Int {
         1500
     }
 
-    /// Check to see if an interface has a specific flag.  For exampe, UP,RUNNING,BROADFAST,MULTICAST
+    /// Returns a Boolean value that indicates whether an interface has a specific flag.
+    ///
+    /// For example, `UP`, `RUNNING`, `BROADCAST`, or `MULTICAST`.
     static func interfaceHasFlag(socket: Int32, name: String, flag: Interface.Details.Flags) throws -> Bool {
         false
     }
 
-    /// Get functional type flags for the interface
+    /// Returns the functional type flags for the interface.
     static func getFunctionalType(socket: Int32, name: String) throws -> UInt32 {
         0
     }
 
-    /// Get all of the interface flags for a specified interface
+    /// Returns all of the interface flags for the specified interface.
     static func interfaceGetInterfaceFlags(socket: Int32, name: String) throws -> UInt32 {
         0
     }
 
-    /// Get all of the interface type for a specified interface
+    /// Returns the interface type for the specified interface.
     static func interfaceGetInterfaceType(socket: Int32, name: String) throws -> InterfaceType {
         .loopback
     }
 
-    /// Get interface sub type
+    /// Returns the interface subtype.
     static func interfaceGetInterfaceSubType(socket: Int32, name: String) throws -> InterfaceSubtype {
         .wifiInfrastructure
     }
 
-    /// Get interface name from index
+    /// Returns the interface name from the index.
     static func interfaceGetNameFromIndex(index: UInt32) throws -> String? {
         String("BogusInterface")
     }

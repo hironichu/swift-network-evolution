@@ -21,21 +21,22 @@ internal import os
 
 // MARK: - One-to-One Protocol Adoption
 
-/// One-to-one protocols are the most basic kinds of protocols that have both
-/// an upper and lower protocol. Conform to `OneToOneStreamProtocol`,
-/// `OneToOneDatagramProtocol`, or `OneToOneStreamToDatagramProtocol`.
+/// The most basic kind of protocol, with both an upper protocol and a lower protocol.
+///
+/// Conform to `OneToOneStreamProtocol`, `OneToOneDatagramProtocol`, or `OneToOneStreamToDatagramProtocol`.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol OneToOneProtocolHandler: ~Copyable, OutboundDataHandler, InboundDataHandler, LoggableProtocol {
 
-    /// The type of upper protocol (towards the application) that can be attached
+    /// The type of upper protocol (toward the app) that you can attach.
     var upper: UpperProtocol { get set }
 
-    /// The type of lower protocol (towards the network) that can be attached
+    /// The type of lower protocol (toward the network) that you can attach.
     var lower: LowerProtocol { get set }
 
-    /// A function called to set up a protocol instance with parameters and endpoints
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Sets up a protocol instance with parameters and endpoints.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func setup(
         remote: Endpoint?,
         local: Endpoint?,
@@ -43,74 +44,79 @@ public protocol OneToOneProtocolHandler: ~Copyable, OutboundDataHandler, Inbound
         path: PathProperties?
     ) throws(NetworkError)
 
-    /// A function called when detaching a protocol
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Tears down a protocol when detaching.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func teardown()
 
-    /// A function called to request that this protocol initiate its handshake, if any.
-    /// If not implemented, the protocol will deliver the connected event automatically.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Requests that this protocol initiate its handshake, if any.
+    ///
+    /// If not implemented, the protocol delivers the connected event automatically.
+    /// Protocols can implement this function to customize behavior.
     mutating func connect()
 
-    /// A function called to request that this protocol gracefully close.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Requests that this protocol gracefully close.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func disconnect(error: NetworkError?)
 
-    /// A function called when the lower protocol has disconnected.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol disconnects.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func handleDisconnectedEvent(error: NetworkError?)
 
-    /// A function called when some lower protocol has sent an event.
-    /// Return `.consumed` if the event was handled and should not be passed up to
+    /// A function the framework calls when a lower protocol sends an event.
+    ///
+    /// Returns `.consumed` if the event was handled and shouldn't pass up to
     /// upper protocols, and `.unconsumed` otherwise.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Protocols can implement this function to customize behavior.
     mutating func handleNetworkProtocolEvent(_ event: NetworkProtocolEvent) -> HandleNetworkEventResult
 
-    /// A function called when the application has sent an event.
-    /// Return `.consumed` if the event was handled and should not be passed down to
+    /// A function the framework calls when the app sends an event.
+    ///
+    /// Returns `.consumed` if the event was handled and shouldn't pass down to
     /// lower protocols, and `.unconsumed` otherwise.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Protocols can implement this function to customize behavior.
     mutating func handleApplicationEvent(_ event: ApplicationEvent) -> HandleNetworkEventResult
 
     #if !NETWORK_EMBEDDED
-    /// Set the metadata state for this protocol
+    /// The metadata state for this protocol.
     var metadata: AbstractProtocolMetadata? { get }
     #endif
 
-    /// Return true if this protocol does not directly handle any events, but instead only passes through
-    /// NOTE: Protocols that do not want to handle events should set true initially.
-    /// The stack may set this to false explicitly, in which case it should not be set back to true.
+    /// A Boolean value that indicates whether this protocol passes events through without handling them directly.
+    ///
+    /// Protocols that don't handle events should initialize this to `true`.
+    /// The stack may set this to `false` explicitly, after which you shouldn't set it back to `true`.
     var passthroughEvents: Bool { get set }
 }
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public enum HandleNetworkEventResult {
-    /// The event was handled and consumed by the protocol, and should not be automatically
-    /// passed on to the next protocol.
+    /// The protocol handled and consumed the event, and the system shouldn't automatically pass it on to the next protocol.
     case consumed
 
-    /// The event was not consumed by the protocol, and is allowed to be automatically
-    /// passed on to the next protocol.
+    /// The protocol didn't consume the event, and the system can automatically pass it on to the next protocol.
     case unconsumed
 }
 
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 extension OneToOneProtocolHandler where Self: ~Copyable {
-    /// A function to call to indicate to the upper protocol that this protocol is connected.
-    /// This is only needed if the protocol customizes `connect()`
+    /// Indicates to the upper protocol that this protocol is connected.
+    ///
+    /// Call this only if the protocol customizes `connect()`.
     public func deliverConnectedEvent() {
         upper.deliverConnectedEvent(self.reference)
     }
 
-    /// A function to call to indicate to the upper protocol that this protocol is disconnected,
-    /// with an error.
+    /// Indicates to the upper protocol that this protocol is disconnected, with an error.
     public func deliverDisconnectedEvent(error: NetworkError?) {
         upper.deliverDisconnectedEvent(self.reference, error: error)
     }
 
-    /// A function to call to pass an event to the upper protocol.
+    /// Passes an event to the upper protocol.
     public func deliverNetworkProtocolEvent(_ event: NetworkProtocolEvent) {
         upper.deliverNetworkProtocolEvent(
             originalReference: self.reference,
@@ -125,80 +131,93 @@ extension OneToOneProtocolHandler where Self: ~Copyable {
 public protocol OneToOneDatapathProtocol: ~Copyable, OneToOneProtocolHandler
 where UpperProtocol: InboundDataLinkage, LowerProtocol: OutboundDataLinkage {
 
-    /// A function called when the lower protocol has inbound data available to read.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol has inbound data available to read.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func handleInboundDataAvailableEvent()
 
-    /// A function called when the lower protocol has outbound room available to sent.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol has outbound room available to send.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func handleOutboundRoomAvailableEvent()
 }
 
-/// One-to-one protocol with an upper stream linkage and a lower stream linkage
+/// One-to-one protocol with an upper stream linkage and a lower stream linkage.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol OneToOneStreamProtocol: ~Copyable, OneToOneDatapathProtocol
 where UpperProtocol == InboundStreamLinkage, LowerProtocol == OutboundStreamLinkage {
 
-    /// A function called when the upper protocol is trying to read stream data.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Returns received stream data to the upper protocol.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func receiveStreamData(minimumBytes: Int, maximumBytes: Int) throws(NetworkError) -> FrameArray?
 
-    /// A function called when the upper protocol is trying to check how much stream data can be written
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Returns the number of bytes of stream data that can be written.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func getOutboundStreamDataRoomAvailable() throws(NetworkError) -> Int
 
-    /// A function called when the upper protocol is trying to write stream data.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Sends stream data created by the upper protocol.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func sendStreamData(_ streamData: consuming FrameArray) throws(NetworkError)
 
-    /// A function called when the lower protocol has reported that the inbound direction of data has been aborted.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol reports that the inbound direction of data is aborted.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func handleInboundAbortedEvent(error: NetworkError?)
 
-    /// A function called when the lower protocol has reported that the outbound direction of data has been aborted.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// A function the framework calls when the lower protocol reports that the outbound direction of data is aborted.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func handleOutboundAbortedEvent(error: NetworkError?)
 }
 
-/// One-to-one protocol with an upper stream linkage and a lower datagram linkage
+/// One-to-one protocol with an upper stream linkage and a lower datagram linkage.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol OneToOneStreamToDatagramProtocol: ~Copyable, OneToOneDatapathProtocol
 where UpperProtocol == InboundStreamLinkage, LowerProtocol == OutboundDatagramLinkage {
 
-    /// A function called when the upper protocol is trying to read stream data.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Returns received stream data to the upper protocol.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func receiveStreamData(minimumBytes: Int, maximumBytes: Int) throws(NetworkError) -> FrameArray?
 
-    /// A function called when the upper protocol is trying to check how much stream data can be written
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Returns the number of bytes of stream data that can be written.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func getOutboundStreamDataRoomAvailable() throws(NetworkError) -> Int
 
-    /// A function called when the upper protocol is trying to write stream data.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Sends stream data created by the upper protocol.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func sendStreamData(_ streamData: consuming FrameArray) throws(NetworkError)
 }
 
-/// One-to-one protocol with an upper datagram linkage and a lower datagram linkage
+/// One-to-one protocol with an upper datagram linkage and a lower datagram linkage.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol OneToOneDatagramProtocol: ~Copyable, OneToOneDatapathProtocol
 where UpperProtocol == InboundDatagramLinkage, LowerProtocol == OutboundDatagramLinkage {
 
-    /// A function called when the upper protocol is trying to read datagrams.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Returns received datagrams to the upper protocol.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func receiveDatagrams(maximumDatagramCount: Int) throws(NetworkError) -> FrameArray?
 
-    /// A function called when the upper protocol is trying to get datagram frames to send.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Returns datagram frames the upper protocol can use to send.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func getDatagramsToSend(
         maximumDatagramCount: Int,
         minimumDatagramSize: Int
     ) throws(NetworkError) -> FrameArray?
 
-    /// A function called when the upper protocol is trying to send datagrams.
-    /// NOTE: Protocols can implement this function to customize behavior
+    /// Sends datagrams created by the upper protocol.
+    ///
+    /// Protocols can implement this function to customize behavior.
     mutating func sendDatagrams(_ datagrams: consuming FrameArray) throws(NetworkError)
 }
 

@@ -17,7 +17,7 @@ import Glibc
 internal import Logging
 internal import SwiftNetworkLinuxShim
 
-/// Set of Linux system APIs for interacting with the system interface
+/// A set of Linux system APIs for interacting with the system interface.
 internal enum SystemInterface {
 
     enum Constants {
@@ -58,7 +58,9 @@ internal enum SystemInterface {
         }.result
     }
 
-    /// Get MTU from the interface using ioctl
+    /// Gets the MTU from the interface.
+    ///
+    /// Uses `ioctl` to fetch the value.
     static func interfaceGetMTU(socket: Int32, name: String) throws -> Int {
         if name.isEmpty {
             return 65535
@@ -74,7 +76,9 @@ internal enum SystemInterface {
         }
     }
 
-    /// Check to see if an interface has a specific flag.  For example, UP,RUNNING,BROADFAST,MULTICAST
+    /// Returns a Boolean value that indicates whether an interface has a specific flag.
+    ///
+    /// For example, `UP`, `RUNNING`, `BROADCAST`, or `MULTICAST`.
     static func interfaceHasFlag(socket: Int32, name: String, flag: Interface.Details.Flags) throws -> Bool {
         if name.isEmpty {
             return false
@@ -101,7 +105,7 @@ internal enum SystemInterface {
         }
     }
 
-    /// Check to see if an interface is loopback
+    /// Returns a Boolean value that indicates whether an interface is loopback.
     static func interfaceIsLoopback(socket: Int32, name: String) throws -> Bool {
         if name.isEmpty {
             return false
@@ -120,7 +124,7 @@ internal enum SystemInterface {
         }
     }
 
-    /// Check if this is a wireless interface
+    /// Returns a Boolean value that indicates whether this is a wireless interface.
     static func interfaceHasWireless(socket: Int32, name: String) throws -> Bool {
         if name.isEmpty {
             return false
@@ -140,7 +144,7 @@ internal enum SystemInterface {
         }
     }
 
-    /// Check if this is a ethernet interface
+    /// Returns a Boolean value that indicates whether this is an Ethernet interface.
     static func interfaceHasEthernet(socket: Int32, name: String) throws -> Bool {
         if name.isEmpty {
             return false
@@ -159,7 +163,7 @@ internal enum SystemInterface {
         }
     }
 
-    /// Get all of the interface flags for a specified interface
+    /// Returns all of the interface flags for the specified interface.
     static func interfaceGetInterfaceFlags(socket: Int32, name: String) throws -> UInt32 {
         if name.isEmpty {
             return 0
@@ -175,7 +179,7 @@ internal enum SystemInterface {
         }
     }
 
-    /// Get all of the interface type for a specified interface
+    /// Returns the interface type for the specified interface.
     static func interfaceGetInterfaceType(socket: Int32, name: String) throws -> InterfaceType {
         var interfaceType = InterfaceType.other
         // Check for loopback, wireless, and wired.
@@ -196,7 +200,7 @@ internal enum SystemInterface {
         }
     }
 
-    /// Get name of the interface by index
+    /// Returns the name of the interface by index.
     static func interfaceGetNameFromIndex(index: UInt32) throws -> String? {
         // NOTE: on Linux calling if_indextoname with an index of 0 will return NULL, which is fine
         // but will set the errno to 6 - abort, which we do not want, so we guard for this here.

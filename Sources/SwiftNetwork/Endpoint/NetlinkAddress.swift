@@ -23,16 +23,16 @@ internal import os
 // NetlinkAddress represents sockaddr_nl on Linux
 struct NetlinkAddress: IPAddress, Hashable, CustomDebugStringConvertible {
 
-    /// Indicates if this address is loopback
+    /// A Boolean value that indicates whether this address is a loopback address.
     var isLoopback: Bool { false }
 
-    /// Indicates if this address is multicast
+    /// A Boolean value that indicates whether this address is a multicast address.
     var isMulticast: Bool {
         // TODO: Extend using nl_groups
         false
     }
 
-    /// Create IPAddress from raw bytes
+    /// Creates a Netlink address from raw bytes.
     init?(_ bytes: [UInt8]) {
         if bytes.count >= NetlinkAddress.layoutSize {
             #if os(Linux)

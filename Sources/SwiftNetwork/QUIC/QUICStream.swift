@@ -642,9 +642,13 @@ public final class QUICStreamInstance: MultiplexedStreamFlow<QUICConnection>,
         parentProtocol.handleStreamClose(stream: self, error: errorCode)
     }
 
-    /// Application error code for the inbound (receive) direction, used for STOP_SENDING.
+    /// The application error code for the inbound (receive) direction.
+    ///
+    /// Used for the `STOP_SENDING` frame.
     var inboundApplicationError: UInt64?
-    /// Application error code for the outbound (send) direction, used for RESET_STREAM.
+    /// The application error code for the outbound (send) direction.
+    ///
+    /// Used for the `RESET_STREAM` frame.
     var outboundApplicationError: UInt64?
 
     public func abortOutbound(error: NetworkError?) {

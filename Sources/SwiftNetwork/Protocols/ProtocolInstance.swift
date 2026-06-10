@@ -26,35 +26,37 @@ internal import os
 
 // MARK: Protocol Instance
 
-/// `ProtocolInstance` is the base Swift protocol for any networking protocol instance that
-/// can be connected in a stack. Most protocols will conform to either `OneToOneProtocolHandler`
-/// or `ManyToManyProtocolHandler`, although protocols that are only the top or bottom of
-/// a stack may only conform to `UpperProtocolHandler` or `LowerProtocolHandler`.
+/// The base Swift protocol for any networking protocol instance you can connect in a stack.
+///
+/// Most protocols conform to either `OneToOneProtocolHandler`
+/// or `ManyToManyProtocolHandler`. Protocols that occupy only the top or bottom of
+/// a stack conform to `UpperProtocolHandler` or `LowerProtocolHandler`.
 ///
 /// For data handling, see `ProtocolDatagramHandlers` and `ProtocolStreamHandlers`.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol ProtocolInstance: ~Copyable {
 
-    /// The scheduling context on which the protocol instance must run
+    /// The scheduling context on which the protocol instance must run.
     var context: NetworkContext { get }
 
-    /// A struct to refer to the protocol instance, and which holds a reference to its containing object
+    /// A structure that refers to the protocol instance and holds a reference to its containing object.
     var reference: ProtocolInstanceReference { get }
 
-    /// An opaque struct that keeps track of the internal consistency of any protocol.
+    /// An opaque structure that tracks the internal consistency of any protocol.
     var eventManager: ProtocolEventManager { get set }
 }
 
 extension ProtocolInstance where Self: ~Copyable {
 
-    /// Schedule an asynchronous block from within a protocol implementation
+    /// Schedules an asynchronous block from within a protocol implementation.
     public func async(_ block: @escaping () -> Void) {
         reference.async(block)
     }
 
-    /// Enter a protocol's execution state from an external source. This must be called
-    /// on the context, and must be called before the protocol invokes any calls to other protocols.
+    /// Enters a protocol's execution state from an external source.
+    ///
+    /// Call this on the context, and call it before the protocol invokes any calls to other protocols.
     public func fromExternal<R, E: Error>(_ block: () throws(E) -> R) throws(E) -> R {
         try reference.fromExternal(block)
     }
@@ -71,11 +73,11 @@ extension ProtocolInstance where Self: ~Copyable {
 
 // MARK: Timer Schedulable
 
-/// Indicate that a network protocol can be scheduled using a timer
+/// Indicates that a network protocol can be scheduled using a timer.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol TimerSchedulable: ~Copyable, ProtocolInstance {
-    /// Handle a wakeup from a timer
+    /// Handles a wakeup from a timer.
     func wakeup()
 }
 
@@ -237,8 +239,10 @@ public enum ProtocolInstanceError: Error {
 
 // MARK: Protocol Instance Container
 
-/// Conform to `ProtocolInstanceContainer` in order to implement a custom protocol.
-/// The index can be used to host multiple protocols within one object.
+/// A container that hosts one or more custom protocol implementations.
+///
+/// Conform to `ProtocolInstanceContainer` to implement a custom protocol.
+/// Use the index to host multiple protocols within one object.
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public protocol ProtocolInstanceContainer: AnyObject {

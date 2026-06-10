@@ -2923,12 +2923,19 @@ public final class QUICConnection: ManyToManyApplicationStreamProtocol,
     }
 
     @discardableResult
-    func sendFrames(ignoreCongestionWindow: Bool = false) -> Bool {
-        // Make sure there is something to send first
+    func sendFrames(ignoreCongestionWindow: Bool = false, delayedACK: Bool = false) -> Bool {
+        // Make sure there are packets to send
         guard
-            initialPendingItems.hasPendingItems || handshakePendingItems.hasPendingItems
+            initialPendingItems.hasPendingItems
+                || handshakePendingItems.hasPendingItems
                 || applicationPendingItems.hasPendingItems
         else {
+            return false
+        }
+        // For ACK bundling purposes make sure to rely on the ACK-delay timer as much as possible
+        guard !applicationPendingItems.isAckOnly || delayedACK else {
+            // Make sure the ack-delay timer is armed if returning early
+            ack.scheduleDelayedAck()
             return false
         }
         return withCurrentPath { path in

@@ -340,7 +340,7 @@ struct SecFramerAESGCM: ~Copyable, SecFramerProtocol {
             }
         }
         guard result == kCCSuccess else {
-            keys.log.error("unable to \(loggingOperation) header: \(result)")
+            keys.log.error("Unable to \(loggingOperation) header: \(result)")
             throw QUICError.protector(.headerProtectionFailed)
         }
         #elseif canImport(CryptoExtras) || NETWORK_STANDALONE
@@ -365,7 +365,7 @@ struct SecFramerAESGCM: ~Copyable, SecFramerProtocol {
                 }
             }.get()
         } catch {
-            keys.log.error("unable to \(loggingOperation) header: \(error)")
+            keys.log.error("Unable to \(loggingOperation) header: \(error)")
             throw QUICError.protector(.headerProtectionFailed)
         }
         #endif
@@ -388,7 +388,7 @@ struct SecFramerAESGCM: ~Copyable, SecFramerProtocol {
         )
         #endif
         guard var buffer = frame.mutableSpan else {
-            keys.log.error("unclaimed bytes nil")
+            keys.log.error("Unclaimed bytes nil")
             throw QUICError.protector(SecFramerError.openFailed)
         }
         do {
@@ -550,7 +550,7 @@ struct SecFramerChaChaPoly: ~Copyable, SecFramerProtocol {
         )
         #endif
         guard var buffer = frame.mutableSpan else {
-            keys.log.error("buffer nil")
+            keys.log.error("Buffer nil")
             throw QUICError.protector(SecFramerError.openFailed)
         }
         #if !NETWORK_EMBEDDED
@@ -767,7 +767,7 @@ struct Protector: ~Copyable, PrefixedLoggable {
     }
 
     mutating func swapFramers(keyState: PacketKeyState) {
-        log.debug("swapping framers since we're a server")
+        log.debug("Swapping framers since we're a server")
         swap(&readFramer[keyState.rawValue], &writeFramer[keyState.rawValue])
     }
 
@@ -1312,7 +1312,7 @@ struct Protector: ~Copyable, PrefixedLoggable {
                 tag: retryTag
             )
         } catch {
-            Logger.proto.error("failed to open retry packet")
+            Logger.proto.error("Failed to open retry packet")
             throw QUICError.protector(SecFramerError.openFailed)
         }
     }

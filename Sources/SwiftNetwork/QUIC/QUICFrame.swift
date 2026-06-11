@@ -1075,7 +1075,7 @@ struct FrameResetStream: ~Copyable, QUICFrameProtocol {
     func process(connection: QUICConnection) -> Bool {
         guard let streamID = QUICStreamID(self.id) else {
             let idValue = self.id
-            Logger.proto.error("stream frame with invalid stream ID \(idValue)")
+            Logger.proto.error("Stream frame with invalid stream ID \(idValue)")
             return false
         }
         // An endpoint that receives a RESET_STREAM frame for a
@@ -1123,7 +1123,7 @@ struct FrameResetStream: ~Copyable, QUICFrameProtocol {
                 let created = connection.flow(for: flowID)
             else {
                 Logger.proto.error(
-                    "stream \(streamID.value) is not a QUICStreamInstance after createInboundStreams"
+                    "Stream \(streamID.value) is not a QUICStreamInstance after createInboundStreams"
                 )
                 return true
             }
@@ -1255,14 +1255,14 @@ struct FrameStopSending: ~Copyable, QUICFrameProtocol {
     func process(connection: QUICConnection) -> Bool {
         guard let streamID = QUICStreamID(self.id) else {
             let idValue = self.id
-            Logger.proto.error("stream frame with invalid stream ID \(idValue)")
+            Logger.proto.error("Stream frame with invalid stream ID \(idValue)")
             return false
         }
         // An endpoint that receives a STOP_SENDING frame for a receive-only
         // stream MUST terminate the connection with error STREAM_STATE_ERROR.
         if streamID.isReceiveOnly(server: connection.isServer) {
             Logger.proto.error(
-                "received STOP_SENDING for receive only stream"
+                "Received STOP_SENDING for receive only stream"
             )
             connection.close(with: .streamStateError, "STREAM frame on send-only stream")
             return false

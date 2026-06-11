@@ -223,7 +223,7 @@ struct AckSpace: ~Copyable, PrefixedLoggable {
             return 0
         }
         guard _slowPath(largestTimestamp != .zero) else {
-            log.debug("largest PN receive time can't be 0 (\(packetNumberSpace))")
+            log.debug("Largest PN receive time can't be 0 (\(packetNumberSpace))")
             return 0
         }
         let largest = lastBlock.end
@@ -828,7 +828,7 @@ final class Ack: PrefixedLoggable, TimerUser {
 
     func flush(for packetNumberSpace: PacketNumberSpace) {
         withAckSpace(packetNumberSpace: packetNumberSpace) { ackSpace in
-            log.debug("flushing all PN for \(packetNumberSpace)")
+            log.debug("Flushing all PN for \(packetNumberSpace)")
             ackSpace.blocks = []
             ackSpace.needsTransmission = false
             return true
@@ -978,13 +978,13 @@ struct AckBitstring: ~Copyable {
         let initialWord = initialWord
         if _slowPath(startWord < initialWord) {
             Logger.proto.fault(
-                "initial word \(initialWord) is lower than start \(startWord) (pn \(start))"
+                "Initial word \(initialWord) is lower than start \(startWord) (pn \(start))"
             )
             return false
         }
         if _slowPath(stopWord < initialWord) {
             Logger.proto.fault(
-                "initial word \(initialWord) is lower than stop \(stopWord) (pn \(stop))"
+                "Initial word \(initialWord) is lower than stop \(stopWord) (pn \(stop))"
             )
             return false
         }
@@ -1004,13 +1004,13 @@ struct AckBitstring: ~Copyable {
         let initialWord = initialWord
         if _slowPath(startWord > initialWord + bitstringCount) {
             Logger.proto.fault(
-                "size \(bitstringCount + initialWord) is lower than start \(startWord) (pn \(start))"
+                "Size \(bitstringCount + initialWord) is lower than start \(startWord) (pn \(start))"
             )
             return false
         }
         if _slowPath(stopWord > initialWord + bitstringCount) {
             Logger.proto.fault(
-                "size \(bitstringCount + initialWord) is lower than start \(stopWord) (pn \(stop))"
+                "Size \(bitstringCount + initialWord) is lower than start \(stopWord) (pn \(stop))"
             )
             return false
         }
@@ -1028,7 +1028,7 @@ struct AckBitstring: ~Copyable {
 
         if stopWord >= size {
             guard _slowPath(stopWord < UInt32.max / 2) else {
-                Logger.proto.info("refusing to grow bitstring further")
+                Logger.proto.info("Refusing to grow bitstring further")
                 return
             }
             let targetSize = Int(stopWord) + 1
@@ -1074,7 +1074,7 @@ struct AckBitstring: ~Copyable {
         guard initialWord == other.initialWord else {
             let initialWord = self.initialWord
             let otherInitialWord = other.initialWord
-            Logger.proto.fault("bitstring initial mismatch \(initialWord) != \(otherInitialWord)")
+            Logger.proto.fault("Bitstring initial mismatch \(initialWord) != \(otherInitialWord)")
             return AckBitstringSequence.empty
         }
         if size > other.size {

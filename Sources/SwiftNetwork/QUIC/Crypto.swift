@@ -361,7 +361,7 @@ extension QUICCrypto: TopStreamProtocol, ProtocolInstanceContainer {
 
     func handleConnectedEvent() {
         guard let parentConnection else { return }
-        parentConnection.log.info("connected: TLS finished")
+        parentConnection.log.info("Connected: TLS finished")
         parentConnection.fromExternal {
             parentConnection.reportReady()
         }

@@ -120,7 +120,7 @@ final class Timer: PrefixedLoggable {
 
     func stop(final: Bool = true) {
         if !timerCancelled {
-            log.debug("stopping timer")
+            log.debug("Stopping timer")
             timerCancelled = true
             reference?.unscheduleWakeup()
         }
@@ -163,7 +163,7 @@ final class Timer: PrefixedLoggable {
         }
 
         guard let earliestDeadline else {
-            log.debug("no more timers to run")
+            log.debug("No more timers to run")
             stop(final: false)
             return
         }
@@ -231,7 +231,7 @@ final class Timer: PrefixedLoggable {
 
     public func timerFired(timeNow: NetworkClock.Instant = .now) {
         if _slowPath(timerCancelled) {
-            log.fault("timer fired after it was cancelled")
+            log.fault("Timer fired after it was cancelled")
             return
         }
         // Due to timer leeway, we might actually be running a bit early, so
@@ -270,11 +270,11 @@ final class Timer: PrefixedLoggable {
             let entryCount = entries.count
             for i in 0..<entryCount {
                 log.error(
-                    "timer [T\(entries[i].identifier)] deadline \(entries[i].deadline), now \(now)"
+                    "Timer [T\(entries[i].identifier)] deadline \(entries[i].deadline), now \(now)"
                 )
             }
             log.fault(
-                "spurious timer at \(now)), next deadline \(nextDeadline), cancelled? \(timerCancelled)"
+                "Spurious timer at \(now)), next deadline \(nextDeadline), cancelled? \(timerCancelled)"
             )
         }
         recalculate(timeNow)

@@ -236,7 +236,6 @@ final class SocketTransfer {
 
 // MARK: - Argument parsing helper
 
-@available(anyAppleOS 26, *)
 func parseArg<T>(_ arguments: [String], _ flag: String, parse: (String) -> T?) -> T? {
     guard let index = arguments.firstIndex(of: flag),
         arguments.count > index + 1

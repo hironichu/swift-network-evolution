@@ -415,7 +415,7 @@ final class QUICStreamLoad {
     }
 }
 
-if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, visionOS 26, *) {
+if #available(anyAppleOS 26, *) {
     // Take command line arguments
     var loggingHandler: LoggingHandle = LoggingHandle(loggingType: .none)
     var uploadSize = 1000  // 1kb

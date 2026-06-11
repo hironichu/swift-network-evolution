@@ -200,7 +200,7 @@ final class IPUDPTransfer {
     }
 }
 
-if #available(macOS 26, iOS 26, tvOS 26, watchOS 26, visionOS 26, *) {
+if #available(anyAppleOS 26, *) {
     // Take command line arguments
     var iterations = 1000
     var packets = 1000

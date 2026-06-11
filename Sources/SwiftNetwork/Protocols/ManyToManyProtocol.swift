@@ -205,6 +205,7 @@ where UpperProtocol: InboundDataLinkage, ParentProtocol: ManyToManyDatapathProto
 @_spi(ProtocolProvider)
 @available(Network 0.1.0, *)
 public typealias MultiplexingPathIdentifier = Int
+@available(Network 0.1.0, *)
 extension MultiplexingPathIdentifier {
     static var none: Self {
         0
@@ -249,6 +250,7 @@ where LowerProtocol: OutboundDataLinkage, ParentProtocol: ManyToManyDatapathProt
 
 // MARK: Implementations
 
+@available(Network 0.1.0, *)
 extension ManyToManyProtocolHandler {
     // Default implementations, to be overridden as necessary
     public func setup(
@@ -307,6 +309,7 @@ extension ManyToManyProtocolHandler {
     ) -> HandleNetworkEventResult { .unconsumed }
 }
 
+@available(Network 0.1.0, *)
 extension ManyToManyProtocolHandler {
     var asListener: UpperProtocol.PairedLinkage { .init(reference: reference) }
 
@@ -428,6 +431,7 @@ extension ManyToManyProtocolHandler {
     }
 }
 
+@available(Network 0.1.0, *)
 extension HomogeneousManyToManyProtocolHandler {
 
     public mutating func performInitialSetupIfNeeded(
@@ -598,6 +602,7 @@ extension HomogeneousManyToManyProtocolHandler {
     #endif
 }
 
+@available(Network 0.1.0, *)
 extension HeterogeneousManyToManyProtocolHandler {
     fileprivate var hasNoUpperLinkages: Bool {
         multiplexedFlows.isEmpty && multiplexedSecondaryFlows.isEmpty && inboundFlowLinkage.isDetached
@@ -634,6 +639,7 @@ extension HeterogeneousManyToManyProtocolHandler {
     }
 }
 
+@available(Network 0.1.0, *)
 extension HeterogeneousManyToManyProtocolHandler {
     var asSecondaryListener: SecondaryUpperProtocol.PairedLinkage { .init(reference: reference) }
 
@@ -916,6 +922,7 @@ extension HeterogeneousManyToManyProtocolHandler {
     #endif
 }
 
+@available(Network 0.1.0, *)
 extension ManyToManyDatapathProtocol where Path.ParentProtocol == Self, Path: InboundDatagramHandler {
     public mutating func attachLowerDatagramProtocolForNewPath(
         _ lowerProtocol: ProtocolInstanceReference,
@@ -937,6 +944,7 @@ extension ManyToManyDatapathProtocol where Path.ParentProtocol == Self, Path: In
     }
 }
 
+@available(Network 0.1.0, *)
 extension ManyToManyDatapathProtocol where Flow.ParentProtocol == Self, Flow: OutboundStreamHandler {
     public mutating func attachNewStreamFlowProtocol(
         _ from: ProtocolInstanceReference,
@@ -1000,6 +1008,7 @@ extension ManyToManyDatapathProtocol where Flow.ParentProtocol == Self, Flow: Ou
     }
 }
 
+@available(Network 0.1.0, *)
 extension ManyToManyDatapathProtocol where Flow.ParentProtocol == Self, Flow: OutboundDatagramHandler {
     public mutating func attachNewDatagramFlowProtocol(
         _ from: ProtocolInstanceReference,
@@ -1063,6 +1072,7 @@ extension ManyToManyDatapathProtocol where Flow.ParentProtocol == Self, Flow: Ou
     }
 }
 
+@available(Network 0.1.0, *)
 extension HeterogeneousManyToManyProtocolHandler
 where SecondaryFlow.ParentProtocol == Self, SecondaryFlow: OutboundDatagramHandler {
     public mutating func attachNewDatagramFlowProtocol(
@@ -1127,6 +1137,7 @@ where SecondaryFlow.ParentProtocol == Self, SecondaryFlow: OutboundDatagramHandl
     }
 }
 
+@available(Network 0.1.0, *)
 extension MultiplexedFlow {
     var asLower: UpperProtocol.PairedLinkage { .init(reference: reference) }
 
@@ -1247,6 +1258,7 @@ extension MultiplexedFlow {
     #endif
 }
 
+@available(Network 0.1.0, *)
 extension MultiplexedFlow where ParentProtocol: HeterogeneousManyToManyProtocolHandler {
     public mutating func detach(_ from: ProtocolInstanceReference) throws(NetworkError) {
         do { try validate(upper: from, #function) } catch { throw NetworkError.posix(EINVAL) }
@@ -1261,6 +1273,7 @@ extension MultiplexedFlow where ParentProtocol: HeterogeneousManyToManyProtocolH
     }
 }
 
+@available(Network 0.1.0, *)
 extension MultiplexedDatapathFlow where Self: AutomaticUpperStreamProcessing {
     public mutating func receiveStreamData(
         _ from: ProtocolInstanceReference,
@@ -1293,6 +1306,7 @@ extension MultiplexedDatapathFlow where Self: AutomaticUpperStreamProcessing {
     }
 }
 
+@available(Network 0.1.0, *)
 extension MultiplexedDatapathFlow where Self: AutomaticUpperStreamProcessing, Self: OutboundStreamEarlyDataHandler {
     public mutating func sendEarlyStreamData(
         _ from: ProtocolInstanceReference,
@@ -1306,6 +1320,7 @@ extension MultiplexedDatapathFlow where Self: AutomaticUpperStreamProcessing, Se
     }
 }
 
+@available(Network 0.1.0, *)
 extension ManyToManyApplicationStreamProtocol where Flow: AutomaticUpperStreamProcessing {
     public func accessStreamDataToSend(flow flowID: MultiplexedFlowIdentifier, _ body: (inout FrameArray) -> Void) {
         guard var flow = self.flow(for: flowID) else { return }
@@ -1413,6 +1428,7 @@ public protocol UnidirectionalAbortingStreamFlow: MultiplexedDatapathFlow, Outbo
     func abortOutbound(error: NetworkError?)
 }
 
+@available(Network 0.1.0, *)
 extension UnidirectionalAbortingStreamFlow {
     public func deliverInboundAbortedEvent(error: NetworkError?) {
         if upper.isDetached {
@@ -1457,6 +1473,7 @@ extension UnidirectionalAbortingStreamFlow {
 @available(Network 0.1.0, *)
 public protocol EarlyDataStreamFlow: MultiplexedDatapathFlow, OutboundStreamEarlyDataHandler {}
 
+@available(Network 0.1.0, *)
 extension MultiplexedDatapathFlow where Self: AutomaticUpperDatagramProcessing {
     public mutating func receiveDatagrams(
         _ from: ProtocolInstanceReference,
@@ -1496,6 +1513,7 @@ extension MultiplexedDatapathFlow where Self: AutomaticUpperDatagramProcessing {
     }
 }
 
+@available(Network 0.1.0, *)
 extension ManyToManyApplicationDatagramProtocol where Flow: AutomaticUpperDatagramProcessing {
     public func accessDatagramsToSend(flow flowID: MultiplexedFlowIdentifier, _ body: (inout FrameArray) -> Void) {
         guard var flow = self.flow(for: flowID) else { return }
@@ -1527,6 +1545,7 @@ extension ManyToManyApplicationDatagramProtocol where Flow: AutomaticUpperDatagr
     }
 }
 
+@available(Network 0.1.0, *)
 extension HeterogeneousManyToManyProtocolHandler where SecondaryFlow: AutomaticUpperDatagramProcessing {
     public func accessDatagramsToSend(flow flowID: MultiplexedFlowIdentifier, _ body: (inout FrameArray) -> Void) {
         guard var flow = self.secondaryFlow(for: flowID) else { return }
@@ -1621,6 +1640,7 @@ open class MultiplexedDatagramFlow<ParentProtocol: ManyToManyApplicationDatagram
     }
 }
 
+@available(Network 0.1.0, *)
 extension MultiplexingPath {
     var asUpper: LowerProtocol.PairedLinkage { .init(reference: reference) }
 
@@ -1672,6 +1692,7 @@ extension MultiplexingPath {
     }
 }
 
+@available(Network 0.1.0, *)
 extension MultiplexingPath {
     public func handleConnectedEvent(_ from: ProtocolInstanceReference) {
         do { try validate(lower: from, #function) } catch { return }
@@ -1712,6 +1733,7 @@ extension MultiplexingPath {
     }
 }
 
+@available(Network 0.1.0, *)
 extension ManyToManyProtocolHandler {
     public func deliverNewInboundFlowEvent(
         _ flowReference: ProtocolInstanceReference,
@@ -1792,6 +1814,7 @@ extension ManyToManyProtocolHandler {
     }
 }
 
+@available(Network 0.1.0, *)
 extension HeterogeneousManyToManyProtocolHandler {
     public func deliverConnectedEvent(flow flowID: MultiplexedFlowIdentifier) {
         switch flowID {
@@ -1878,6 +1901,7 @@ extension HeterogeneousManyToManyProtocolHandler {
     }
 }
 
+@available(Network 0.1.0, *)
 extension ManyToManyOutboundDatagramProtocol where Path: AutomaticLowerDatagramProcessing {
     public mutating func resumeReadingInboundDatagrams(path pathID: MultiplexingPathIdentifier) {
         guard var path = self.path(for: pathID) else { return }
@@ -1923,6 +1947,7 @@ extension ManyToManyOutboundDatagramProtocol where Path: AutomaticLowerDatagramP
     }
 }
 
+@available(Network 0.1.0, *)
 extension MultiplexingDatapathPath where Self: AutomaticLowerDatagramProcessing {
     public mutating func handleInboundDataAvailableEvent(_ from: ProtocolInstanceReference) {
         do { try validate(lower: from, #function) } catch { return }

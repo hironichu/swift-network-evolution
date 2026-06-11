@@ -223,6 +223,7 @@ where UpperProtocol == InboundDatagramLinkage, LowerProtocol == OutboundDatagram
 
 // MARK: - One-to-One Protocol Implementation Details
 
+@available(Network 0.1.0, *)
 extension OneToOneProtocolHandler where Self: ~Copyable {
     var asUpper: LowerProtocol.PairedLinkage { .init(reference: reference) }
     var asLower: UpperProtocol.PairedLinkage { .init(reference: reference) }
@@ -400,6 +401,7 @@ extension OneToOneProtocolHandler where Self: ~Copyable {
 }
 
 // Default implementations, to be overridden as necessary
+@available(Network 0.1.0, *)
 extension OneToOneProtocolHandler where Self: ~Copyable {
     public mutating func setup(
         remote: Endpoint?,
@@ -431,6 +433,7 @@ extension OneToOneProtocolHandler where Self: ~Copyable {
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneProtocolHandler where Self: ~Copyable {
     @inline(__always)
     var effectiveSelfReference: ProtocolInstanceReference {
@@ -442,6 +445,7 @@ extension OneToOneProtocolHandler where Self: ~Copyable {
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneDatapathProtocol where Self: ~Copyable {
     public mutating func handleInboundDataAvailableEvent(_ from: ProtocolInstanceReference) {
         do { try validate(lower: from, #function) } catch { return }
@@ -464,6 +468,7 @@ extension OneToOneDatapathProtocol where Self: ~Copyable {
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneDatapathProtocol where Self: ~Copyable {
     // Default implementations, to be overridden as necessary
     public mutating func handleInboundDataAvailableEvent() {
@@ -475,6 +480,7 @@ extension OneToOneDatapathProtocol where Self: ~Copyable {
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneProtocolHandler where Self: ~Copyable, UpperProtocol == InboundDatagramLinkage {
     public mutating func attachUpperDatagramProtocol(
         _ from: ProtocolInstanceReference,
@@ -512,6 +518,7 @@ extension OneToOneProtocolHandler where Self: ~Copyable, UpperProtocol == Inboun
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneProtocolHandler where Self: ~Copyable, UpperProtocol == InboundStreamLinkage {
     public mutating func attachUpperStreamProtocol(
         _ from: ProtocolInstanceReference,
@@ -544,6 +551,7 @@ extension OneToOneProtocolHandler where Self: ~Copyable, UpperProtocol == Inboun
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneProtocolHandler where Self: ~Copyable, LowerProtocol == OutboundDatagramLinkage {
     public mutating func attachLowerDatagramProtocol(
         _ lowerProtocol: ProtocolInstanceReference,
@@ -588,6 +596,7 @@ extension OneToOneProtocolHandler where Self: ~Copyable, LowerProtocol == Outbou
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneDatagramProtocol where Self: ~Copyable {
     public mutating func receiveDatagrams(
         _ from: ProtocolInstanceReference,
@@ -625,6 +634,7 @@ extension OneToOneDatagramProtocol where Self: ~Copyable {
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneProtocolHandler where Self: ~Copyable, LowerProtocol == OutboundStreamLinkage {
     public mutating func attachLowerStreamProtocol(
         _ lowerProtocol: ProtocolInstanceReference,
@@ -670,6 +680,7 @@ extension OneToOneProtocolHandler where Self: ~Copyable, LowerProtocol == Outbou
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneStreamToDatagramProtocol where Self: ~Copyable {
     public mutating func receiveStreamData(
         _ from: ProtocolInstanceReference,
@@ -703,6 +714,7 @@ extension OneToOneStreamToDatagramProtocol where Self: ~Copyable {
     }
 }
 
+@available(Network 0.1.0, *)
 extension OneToOneStreamProtocol where Self: ~Copyable {
     public mutating func receiveStreamData(
         _ from: ProtocolInstanceReference,

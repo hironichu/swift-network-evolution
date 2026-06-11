@@ -73,6 +73,7 @@ extension IOResult where T: FixedWidthInteger {
     }
 }
 
+@available(Network 0.1.0, *)
 extension System {
 
     #if !NETWORK_STANDALONE || NETWORK_DRIVERKIT

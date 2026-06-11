@@ -28,6 +28,7 @@ internal import SwiftSystem
 
 #if canImport(CryptoKit)
 internal import CryptoKit
+@available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
 typealias SymmetricKey = CryptoKit.SymmetricKey
 #elseif canImport(Crypto)
 @preconcurrency internal import Crypto
@@ -58,10 +59,13 @@ internal import DequeModule
 #endif
 #endif
 
+@available(Network 0.1.0, *)
 typealias ProtectorNonce = [12 of UInt8]
+@available(Network 0.1.0, *)
 typealias ProtectorIV = [12 of UInt8]
 
 // Crypto returns an IV in SymmetricKey format, but to speed up performance, we convert it to an InlineArray.
+@available(Network 0.1.0, *)
 extension ProtectorIV {
     init(_ key: SymmetricKey) {
         precondition(key.bitCount == 96)
@@ -79,6 +83,7 @@ enum SecFramerError: Int, Error {
     case openFailed
 }
 
+@available(Network 0.1.0, *)
 enum TLSEncryptionLevel: CaseIterable {
     case initial
     case earlyData
@@ -144,6 +149,7 @@ enum TLSCipherSuite: CaseIterable {
     }
 }
 
+@available(Network 0.1.0, *)
 struct SecFramerKeys: ~Copyable {
     enum KeyType {
         case aesGCM
@@ -195,6 +201,7 @@ struct SecFramerKeys: ~Copyable {
     }
 }
 
+@available(Network 0.1.0, *)
 protocol SecFramerProtocol: ~Copyable {
     static func createKeyStorage(
         key: SymmetricKey,
@@ -227,6 +234,7 @@ protocol SecFramerProtocol: ~Copyable {
     ) throws(QUICError)
 }
 
+@available(Network 0.1.0, *)
 struct SecFramerAESGCM: ~Copyable, SecFramerProtocol {
 
     static func createKeyStorage(
@@ -417,6 +425,7 @@ struct SecFramerAESGCM: ~Copyable, SecFramerProtocol {
 }
 
 #if !NETWORK_EMBEDDED
+@available(Network 0.1.0, *)
 struct SecFramerChaChaPoly: ~Copyable, SecFramerProtocol {
     static func createKeyStorage(
         key: SymmetricKey,
@@ -577,6 +586,7 @@ struct SecFramerChaChaPoly: ~Copyable, SecFramerProtocol {
 }
 #endif
 
+@available(Network 0.1.0, *)
 struct Protector: ~Copyable, PrefixedLoggable {
     var log: LogPrefixer
 
@@ -1345,6 +1355,7 @@ struct Protector: ~Copyable, PrefixedLoggable {
 #else
 
 // Stub implementation
+@available(Network 0.1.0, *)
 struct Protector: ~Copyable, PrefixedLoggable {
     var log: LogPrefixer
     private let isClient: Bool
@@ -1409,12 +1420,14 @@ struct Protector: ~Copyable, PrefixedLoggable {
 #endif
 #endif
 
+@available(macOS 10.14.4, iOS 12.2, tvOS 12.2, watchOS 5.2, *)
 extension RawSpan {
     subscript(index: Int) -> UInt8 {
         unsafeLoad(fromByteOffset: index, as: UInt8.self)
     }
 }
 
+@available(Network 0.1.0, *)
 extension MutableRawSpan {
     subscript(index: Int) -> UInt8 {
         get { unsafeLoad(fromByteOffset: index, as: UInt8.self) }
@@ -1422,6 +1435,7 @@ extension MutableRawSpan {
     }
 }
 
+@available(macOS 10.14.4, iOS 12.2, tvOS 12.2, watchOS 5.2, *)
 extension Array where Element == UInt8 {
     /// Copies the bytes of the given raw span into this array.
     ///

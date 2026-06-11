@@ -21,6 +21,7 @@ internal import Logging
 internal import os
 #endif
 
+@available(Network 0.1.0, *)
 enum QUICStatistic: Int, CaseIterable {
     case connectionAttempts
     case connectionsEstablished
@@ -138,6 +139,7 @@ enum QUICStatistic: Int, CaseIterable {
     case txDepartureTimestamp
 }
 
+@available(Network 0.1.0, *)
 struct Statistics: ~Copyable {
 
     private var statisticsArray: [96 of Int]

@@ -30,7 +30,6 @@ internal import os
 ///
 /// See `NetworkPOSIXError` and `HTTP2Error` as two examples of `NetworkDomainSpecificError`.
 @_spi(ProtocolProvider)
-@available(Network 0.1.0, *)
 public protocol NetworkDomainSpecificError: Error, Sendable, CustomStringConvertible {
     static var domain: NetworkError.Domain { get }
     var code: Int64 { get }
@@ -49,7 +48,6 @@ public protocol NetworkDomainSpecificError: Error, Sendable, CustomStringConvert
 /// emit an error that protocols can translate into different error codes — for example,
 /// HTTP/2 `ENHANCE_YOUR_CALM` versus `H3_EXCESSIVE_LOAD`.
 @_spi(ProtocolProvider)
-@available(Network 0.1.0, *)
 public struct NetworkError: Error, Sendable, Hashable, CustomStringConvertible {
     private let domain: Domain?
     private let code: Int64?
@@ -137,7 +135,6 @@ extension NetworkError.CommonCategory: Codable {}
 #endif
 
 @_spi(ProtocolProvider)
-@available(Network 0.1.0, *)
 public struct NetworkPOSIXError: NetworkDomainSpecificError {
     public static var domain: NetworkError.Domain { .init(rawValue: "POSIX") }
 

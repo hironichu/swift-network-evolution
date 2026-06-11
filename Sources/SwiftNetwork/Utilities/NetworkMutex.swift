@@ -16,6 +16,7 @@
 
 internal import Synchronization
 
+@available(Network 0.1.0, *)
 typealias NetworkMutex = Mutex
 
 #endif

@@ -20,7 +20,7 @@ internal import os
 #endif
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct CustomIPProtocol: NetworkProtocol {
     public typealias Options = CustomIPOptions
     public typealias Metadata = CustomIPMetadata
@@ -118,7 +118,7 @@ public struct CustomIPProtocol: NetworkProtocol {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ProtocolOptions<CustomIPProtocol> {
     var ipProtocolNumber: UInt8 {
         get { perProtocolOptions!.ipProtocolNumber }

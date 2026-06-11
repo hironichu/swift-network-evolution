@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct EthernetProtocol {
     struct Properties {
         let localEthernet: EthernetAddress

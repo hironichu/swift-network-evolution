@@ -17,7 +17,7 @@ import Foundation
 #endif
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct URLEndpoint: EndpointProtocol, EndpointCommonProtocol {
     public var common: EndpointCommon
     public let url: URL

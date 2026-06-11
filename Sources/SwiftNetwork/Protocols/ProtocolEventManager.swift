@@ -24,7 +24,7 @@ internal import Logging
 internal import os
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ProtocolEventManagerState: ~Copyable {
     enum EventState {
         case idle
@@ -276,7 +276,7 @@ struct ProtocolEventManagerState: ~Copyable {
 }
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct ProtocolEventManager: ~Copyable {
     private(set) var contextIndex: NetworkStateIndex?
     private var context: NetworkContext?
@@ -302,7 +302,7 @@ public struct ProtocolEventManager: ~Copyable {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension NetworkContext {
     fileprivate func softAssert() {
         #if DEBUG
@@ -592,7 +592,7 @@ extension NetworkContext {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ProtocolInstance where Self: ~Copyable {
     func connectRequested() {
         reference.connectRequested()
@@ -612,7 +612,7 @@ extension ProtocolInstance where Self: ~Copyable {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ProtocolInstanceReference {
 
     func connectRequested() {

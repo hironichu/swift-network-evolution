@@ -15,7 +15,7 @@
 #if !NETWORK_NO_SWIFT_QUIC
 
 // MARK: PADDING
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FramePadding {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.padding(ShorthandFramePadding(outgoing: outgoing, frame: self))
@@ -25,7 +25,7 @@ extension FramePadding {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFramePadding: ShorthandLogEntry {
     var outgoing: Bool
     let type = FrameType.padding
@@ -53,7 +53,7 @@ struct ShorthandFramePadding: ShorthandLogEntry {
 }
 
 // MARK: RESET_STREAM
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameResetStream {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.resetStream(
@@ -77,7 +77,7 @@ extension FrameResetStream {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameResetStream: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.resetStream
@@ -106,7 +106,7 @@ struct ShorthandFrameResetStream: ShorthandLogEntry {
 }
 
 // MARK: STOP_SENDING
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameStopSending {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.stopSending(
@@ -124,7 +124,7 @@ extension FrameStopSending {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameStopSending: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.stopSending
@@ -149,7 +149,7 @@ struct ShorthandFrameStopSending: ShorthandLogEntry {
 }
 
 // MARK: CRYPTO
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameCrypto {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.crypto(ShorthandFrameCrypto(outgoing: outgoing, frame: self))
@@ -165,7 +165,7 @@ extension FrameCrypto {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameCrypto: ShorthandLogEntry {
     let type = FrameType.crypto
     let outgoing: Bool
@@ -190,7 +190,7 @@ struct ShorthandFrameCrypto: ShorthandLogEntry {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameAck {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.ack(ShorthandFrameAck(outgoing: outgoing, frame: self))
@@ -214,7 +214,7 @@ extension FrameAck {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameAck: ShorthandLogEntry {
     let type: FrameType
     let delay: UInt64
@@ -283,7 +283,7 @@ struct ShorthandFrameAck: ShorthandLogEntry {
 }
 
 // MARK: MAX_DATA
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameMaxData {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.maxData(ShorthandFrameMaxData(outgoing: outgoing, frame: self))
@@ -293,7 +293,7 @@ extension FrameMaxData {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameMaxData: ShorthandLogEntry {
     var outgoing: Bool
     var type = FrameType.maxData
@@ -315,7 +315,7 @@ struct ShorthandFrameMaxData: ShorthandLogEntry {
 }
 
 // MARK: MAX_STREAM_DATA
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameMaxStreamData {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.maxStreamData(
@@ -333,7 +333,7 @@ extension FrameMaxStreamData {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameMaxStreamData: ShorthandLogEntry {
     var type = FrameType.maxStreamData
     var outgoing: Bool
@@ -359,7 +359,7 @@ struct ShorthandFrameMaxStreamData: ShorthandLogEntry {
 }
 
 // MARK: MAX_STREAMS_BIDI
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameMaxStreamsBidirectional {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.maxStreamsBidirectional(
@@ -373,7 +373,7 @@ extension FrameMaxStreamsBidirectional {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameMaxStreamsBidirectional: ShorthandLogEntry {
     let type = FrameType.maxStreamsBidirectional
     let outgoing: Bool
@@ -395,7 +395,7 @@ struct ShorthandFrameMaxStreamsBidirectional: ShorthandLogEntry {
 }
 
 // MARK: MAX_STREAMS_UNI
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameMaxStreamsUnidirectional {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.maxStreamsUnidirectional(
@@ -409,7 +409,7 @@ extension FrameMaxStreamsUnidirectional {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameMaxStreamsUnidirectional: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.maxStreamsUnidirectional
@@ -431,7 +431,7 @@ struct ShorthandFrameMaxStreamsUnidirectional: ShorthandLogEntry {
 }
 
 // MARK: DATA_BLOCKED
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameDataBlocked {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.dataBlocked(
@@ -445,7 +445,7 @@ extension FrameDataBlocked {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameDataBlocked: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.dataBlocked
@@ -467,7 +467,7 @@ struct ShorthandFrameDataBlocked: ShorthandLogEntry {
 }
 
 // MARK: STREAM_DATA_BLOCKED
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameStreamDataBlocked {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.streamDataBlocked(
@@ -485,7 +485,7 @@ extension FrameStreamDataBlocked {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameStreamDataBlocked: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.streamDataBlocked
@@ -510,7 +510,7 @@ struct ShorthandFrameStreamDataBlocked: ShorthandLogEntry {
 }
 
 // MARK: STREAMS_BLOCKED_BIDI
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameStreamsBlockedBidirectional {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.streamsBlockedBidirectional(
@@ -524,7 +524,7 @@ extension FrameStreamsBlockedBidirectional {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameStreamsBlockedBidirectional: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.streamsBlockedBidirectional
@@ -546,7 +546,7 @@ struct ShorthandFrameStreamsBlockedBidirectional: ShorthandLogEntry {
 }
 
 // MARK: STREAMS_BLOCKED_UNI
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameStreamsBlockedUnidirectional {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.streamsBlockedUnidirectional(
@@ -560,7 +560,7 @@ extension FrameStreamsBlockedUnidirectional {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameStreamsBlockedUnidirectional: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.streamsBlockedUnidirectional
@@ -581,7 +581,7 @@ struct ShorthandFrameStreamsBlockedUnidirectional: ShorthandLogEntry {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameNewConnectionID {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.newConnectionID(
@@ -605,7 +605,7 @@ extension FrameNewConnectionID {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameNewConnectionID: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.newConnectionID
@@ -638,7 +638,7 @@ struct ShorthandFrameNewConnectionID: ShorthandLogEntry {
 }
 
 // MARK: RETIRE_CONNECTION_ID
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameRetireConnectionID {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.retireConnectionID(
@@ -652,7 +652,7 @@ extension FrameRetireConnectionID {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameRetireConnectionID: ShorthandLogEntry {
     let outgoing: Bool
     let type = FrameType.retireConnectionID
@@ -674,7 +674,7 @@ struct ShorthandFrameRetireConnectionID: ShorthandLogEntry {
 }
 
 // MARK: CONNECTION_CLOSE
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameConnectionClose {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.connectionClose(
@@ -698,7 +698,7 @@ extension FrameConnectionClose {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameConnectionClose: ShorthandLogEntry {
     let outgoing: Bool
     let errorCode: UInt64
@@ -730,7 +730,7 @@ struct ShorthandFrameConnectionClose: ShorthandLogEntry {
 }
 
 // MARK: APPLICATION_CLOSE
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameApplicationClose {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.applicationClose(
@@ -748,7 +748,7 @@ extension FrameApplicationClose {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameApplicationClose: ShorthandLogEntry {
     let outgoing: Bool
     let errorCode: UInt64
@@ -774,7 +774,7 @@ struct ShorthandFrameApplicationClose: ShorthandLogEntry {
 
 // MARK: DATAGRAM
 // MARK: DATAGRAM_LEN
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameDatagram {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.datagram(ShorthandFrameDatagram(outgoing: outgoing, frame: self))
@@ -790,7 +790,7 @@ extension FrameDatagram {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameDatagram: ShorthandLogEntry {
     let outgoing: Bool
     let type: FrameType
@@ -822,7 +822,7 @@ struct ShorthandFrameDatagram: ShorthandLogEntry {
 
 //STREAM_FIRST, ..., STREAM_LAST:
 // MARK: STREAM
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameStreamReceived {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         precondition(!outgoing)
@@ -830,7 +830,7 @@ extension FrameStreamReceived {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameStreamSendMetadata {
     static func toShorthandLogEntry(
         outgoing: Bool = true,
@@ -852,7 +852,7 @@ extension FrameStreamSendMetadata {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameStream: ShorthandLogEntry {
     let outgoing: Bool
     let type: FrameType
@@ -895,7 +895,7 @@ struct ShorthandFrameStream: ShorthandLogEntry {
 // The following shorthand types are logged only as their frame type.description.
 // Emit all as ShorthandFrameGeneric() entries.
 // MARK: HANDSHAKE_DONE
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameHandshakeDone {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.handshakeDone(
@@ -909,7 +909,7 @@ extension FrameHandshakeDone {
     }
 }
 // MARK: PING
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FramePing {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.ping(ShorthandFrameGeneric(outgoing: outgoing, type: type))
@@ -922,7 +922,7 @@ extension FramePing {
 }
 
 // MARK: NEW_TOKEN
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FrameNewToken {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.newToken(ShorthandFrameNewToken(outgoing: outgoing, frame: self))
@@ -934,7 +934,7 @@ extension FrameNewToken {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameNewToken: ShorthandLogEntry {
     let outgoing: Bool
     let length: Int
@@ -956,7 +956,7 @@ struct ShorthandFrameNewToken: ShorthandLogEntry {
 }
 
 // MARK: PATH_CHALLENGE
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FramePathChallenge {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.pathChallenge(
@@ -971,7 +971,7 @@ extension FramePathChallenge {
 }
 
 // MARK: PATH_RESPONSE
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension FramePathResponse {
     func toShorthandLogEntry(outgoing: Bool) -> QUICShorthandFrame {
         QUICShorthandFrame.pathResponse(
@@ -985,7 +985,7 @@ extension FramePathResponse {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ShorthandFrameGeneric: ShorthandLogEntry {
     let outgoing: Bool
     private(set) var type: FrameType

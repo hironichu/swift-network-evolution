@@ -19,14 +19,14 @@ import Synchronization
 @_spi(Essentials) @_spi(ProtocolProvider) @testable import SwiftNetwork
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension Frame {
     fileprivate mutating func dropOwnership() {
         self.buffer = .empty
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class SwiftNetworkFrameCustomFinalizerTests: NetTestCase {
 
     private let bufferSize = 128

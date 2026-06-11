@@ -17,14 +17,14 @@ import BasicContainers
 internal import DequeModule
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 protocol NetworkComparable: ~Copyable {
     static func < (lhs: borrowing Self, rhs: borrowing Self) -> Bool
 
     static func == (lhs: borrowing Self, rhs: borrowing Self) -> Bool
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct NetworkPriorityQueue<Element: NetworkComparable & ~Copyable>: ~Copyable {
     internal var _heap: NetworkHeap<Element>
 
@@ -83,14 +83,14 @@ struct NetworkPriorityQueue<Element: NetworkComparable & ~Copyable>: ~Copyable {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension NetworkPriorityQueue where Element: ~Copyable {
     var count: Int {
         self._heap.count
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension NetworkPriorityQueue where Element: Copyable {
 
     func peek() -> Element? {
@@ -102,5 +102,5 @@ extension NetworkPriorityQueue where Element: Copyable {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension NetworkPriorityQueue: Sendable where Element: Sendable {}

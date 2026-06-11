@@ -22,7 +22,7 @@ internal import os
 #endif
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public final class QUICDatagramFlow: MultiplexedDatagramFlow<QUICConnection> {
     private(set) var flowID: UInt64?
     private(set) var contextID: UInt64?

@@ -21,7 +21,7 @@ internal import Logging
 internal import os
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct Ledbat: CongestionControlProtocol, CubicLikeProtocol {
     let log: LogPrefixer
 

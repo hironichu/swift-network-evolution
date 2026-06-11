@@ -21,7 +21,7 @@ internal import Logging
 internal import os
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension System {
     static func isHighMemory() -> Bool {
         #if NETWORK_EMBEDDED
@@ -47,7 +47,7 @@ extension System {
 }
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct QUICRoutingHeader: ~Copyable {
     public var type: UInt8?
     public var version: UInt32?
@@ -57,7 +57,7 @@ public struct QUICRoutingHeader: ~Copyable {
 }
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct QUICConnectionUtilities {
     public static func parseInboundPacket(
         _ buffer: UnsafeRawBufferPointer,

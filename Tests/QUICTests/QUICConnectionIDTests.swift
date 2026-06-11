@@ -23,7 +23,7 @@ import XCTest
 @_spi(Essentials) @_spi(ProtocolProvider) @testable import Network
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 class QUICConnectionIDTests: XCTestCase {
     func testEmptyConnectionID() {
         let connectionID = QUICConnectionID([])

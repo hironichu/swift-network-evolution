@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct BonjourEndpoint: EndpointProtocol, EndpointCommonProtocol {
     public var common: EndpointCommon {
         get { backing.storage.common }

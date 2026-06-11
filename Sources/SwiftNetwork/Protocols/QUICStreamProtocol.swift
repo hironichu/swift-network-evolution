@@ -24,11 +24,11 @@ internal import Synchronization
 #endif
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public typealias QUICProtocol = QUICStreamProtocol
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct QUICStreamProtocol: NetworkProtocol {
     public typealias Options = QUICStreamOptions
     public typealias Metadata = QUICStreamMetadata
@@ -389,7 +389,7 @@ public struct QUICStreamProtocol: NetworkProtocol {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ProtocolOptions<QUICProtocol> {
     var isDatagram: Bool {
         get { perProtocolOptions!.isDatagram }
@@ -413,7 +413,7 @@ extension ProtocolOptions<QUICProtocol> {
     #endif
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ProtocolMetadata<QUICProtocol> {
     public var streamID: UInt64? { perProtocolMetadata?.streamID }
     public var datagramFlowID: UInt64? { perProtocolMetadata?.datagramFlowID }

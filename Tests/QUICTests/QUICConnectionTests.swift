@@ -22,7 +22,7 @@ import XCTest
 @_spi(Essentials) @_spi(ProtocolProvider) @testable import Network
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class QUICConnectionTests: XCTestCase {
     var connection: QUICConnection!
     override func setUp() {
@@ -262,7 +262,7 @@ final class QUICConnectionTests: XCTestCase {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension QUICStreamID {
     static func create(
         base: UInt64,

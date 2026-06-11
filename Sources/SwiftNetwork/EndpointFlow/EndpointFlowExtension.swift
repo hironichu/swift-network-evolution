@@ -19,13 +19,13 @@ internal import Logging
 internal import os
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct EndpointFlowPrivateStorage {
     func handleStateChange(_ state: EndpointFlow.State) {}
     mutating func initForReuse(_ flow: EndpointFlow) {}
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension EndpointFlow {
 
     internal func startOnQueue() throws(NetworkError) {

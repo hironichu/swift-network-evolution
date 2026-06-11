@@ -16,7 +16,7 @@
 
 internal import Synchronization
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 typealias NetworkMutex = Mutex
 
 #endif

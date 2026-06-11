@@ -27,17 +27,17 @@ internal import Logging
 internal import os
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class TestDatagramFlow: MultiplexedDatagramFlow<TestMultiplexingProtocol> {
 
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class TestDatagramPath: MultiplexingDatagramPath<TestMultiplexingProtocol> {
 
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class TestMultiplexingProtocol: ManyToManyApplicationDatagramProtocol, ManyToManyOutboundDatagramProtocol,
     DatagramListenerHandler, HomogeneousManyToManyProtocolHandler, ProtocolInstanceContainer
 {

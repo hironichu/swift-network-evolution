@@ -12,7 +12,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ReadRequest {
     let minimumBytes: Int
     let maximumBytes: Int

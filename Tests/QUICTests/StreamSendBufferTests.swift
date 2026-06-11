@@ -22,7 +22,7 @@ import XCTest
 @_spi(Essentials) @_spi(ProtocolProvider) @testable import Network
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension Frame {
     var bytesCopy: [UInt8]? {
         guard let span = self.span else { return nil }
@@ -30,7 +30,7 @@ extension Frame {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class StreamSendBufferTests: XCTestCase {
     var sendBuf = StreamSendBuffer()
     let log = NetworkLoggerState("[StreamSendBufferTests]")
@@ -389,7 +389,7 @@ final class StreamSendBufferTests: XCTestCase {
     #endif
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class FrameArrayQueueTests: XCTestCase {
     var frameQueue = FrameArrayQueue()
 

@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct HostEndpoint: EndpointProtocol, EndpointCommonProtocol {
     public var common: EndpointCommon
     public let name: String

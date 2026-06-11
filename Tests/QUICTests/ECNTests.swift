@@ -23,7 +23,7 @@ import XCTest
 #endif
 
 // MARK: ECN Initialization Tests
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class ECNTests: XCTestCase {
     var ecn: ECN!
     var ecnPath: ECNPathState!
@@ -180,7 +180,7 @@ final class ECNTests: XCTestCase {
 
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ECNTestStepSend {
     let description: String
     let repeats: Int
@@ -190,7 +190,7 @@ struct ECNTestStepSend {
     let expectedFlag: IPProtocol.ECN
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct ECNTestStepAck: ~Copyable {
     let description: String
     let repeats: Int
@@ -202,7 +202,7 @@ struct ECNTestStepAck: ~Copyable {
     let newlyAckedECNCount: UInt64
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ECNTestStepSend {
     // Convenience constructors since most of the tests follow the same test steps
     static func probingState(flag: IPProtocol.ECN, repeats: Int) -> ECNTestStepSend {
@@ -305,7 +305,7 @@ extension ECNTestStepSend {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ECNTestStepAck {
     // Convenience constructors since most of the tests follow the same test steps
     static func validateToCapable(
@@ -400,7 +400,7 @@ extension ECNTestStepAck {
 }
 
 // MARK: ECN Validation Tests
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class ECNValidateTests: XCTestCase {
     var ecn: ECN!
     var ecnPath: ECNPathState!

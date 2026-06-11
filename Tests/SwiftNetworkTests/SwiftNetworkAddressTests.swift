@@ -15,7 +15,7 @@
 import XCTest
 @_spi(Essentials) @_spi(ProtocolProvider) @testable import SwiftNetwork
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class SwiftNetworkAddressTests: NetTestCase {
 
     @discardableResult

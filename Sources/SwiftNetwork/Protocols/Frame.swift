@@ -25,7 +25,7 @@ internal import os
 #endif
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct Frame: ~Copyable {
     public enum Buffer: ~Copyable {
         case empty
@@ -768,7 +768,7 @@ public struct Frame: ~Copyable {
     #endif
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension Frame {
     var serviceClass: Parameters.ServiceClass {
         get { ipPacketValues?.serviceClass ?? .bestEffort }
@@ -781,7 +781,7 @@ extension Frame {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension Frame {
     // Copy length bytes from offset in this Frame into destination Frame.
     // checking the source offset, length and destination fit.

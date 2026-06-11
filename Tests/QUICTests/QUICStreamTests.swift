@@ -22,10 +22,10 @@ import XCTest
 @_spi(Essentials) @_spi(ProtocolProvider) @testable import Network
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 let quicStreamTestsLogPrefixer = LogPrefixer("[QUICStreamTests]")
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class QUICStreamTests: XCTestCase {
     var stream: QUICStreamInstance!
     var connection = QUICConnection(context: NetworkContext.implicitContext)
@@ -54,7 +54,7 @@ final class QUICStreamTests: XCTestCase {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class QUICStreamIDStateTests: XCTestCase {
     var streamsState = QUICStreamIDState(.unidirectional)
     var connection = QUICConnection(context: NetworkContext.implicitContext)
@@ -90,7 +90,7 @@ final class QUICStreamIDStateTests: XCTestCase {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class QUICStreamListTests: XCTestCase {
     var connection = QUICConnection(context: NetworkContext.implicitContext)
     var logPrefix = LogPrefixer("[QUICStreamListTests]")

@@ -15,7 +15,7 @@
 /// An extension that adds system-resource APIs.
 ///
 /// Extends `System` with system-resource functions.
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension System {
 
     /// Returns the file-descriptor limit, if available.

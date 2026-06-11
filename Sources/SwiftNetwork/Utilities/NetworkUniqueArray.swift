@@ -17,12 +17,12 @@
 import BasicContainers
 internal import DequeModule
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 typealias NetworkUniqueArray = BasicContainers.UniqueArray
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 typealias NetworkRigidArray = BasicContainers.RigidArray
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 typealias NetworkUniqueDeque = DequeModule.UniqueDeque
 
 #endif

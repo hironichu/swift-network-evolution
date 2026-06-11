@@ -28,7 +28,7 @@ internal import os
 #endif
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct QLogConfiguration: CustomStringConvertible, Sendable {
     public var logTitle: String?
     public var logDescription: String?

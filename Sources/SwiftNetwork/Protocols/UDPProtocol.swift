@@ -20,7 +20,7 @@ internal import os
 #endif
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct UDPProtocol: NetworkProtocol {
     public typealias Options = UDPOptions
     public typealias Metadata = UDPMetadata
@@ -458,7 +458,7 @@ public struct UDPProtocol: NetworkProtocol {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ProtocolOptions<UDPProtocol> {
     public var preferNoChecksum: Bool {
         get { perProtocolOptions!.contains(.preferNoChecksum) }

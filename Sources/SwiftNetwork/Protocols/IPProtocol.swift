@@ -20,7 +20,7 @@ internal import os
 #endif
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public struct IPProtocol: NetworkProtocol {
     public typealias Options = IPOptions
     public typealias Metadata = IPMetadata
@@ -1082,7 +1082,7 @@ public struct IPProtocol: NetworkProtocol {
 }
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 extension ProtocolOptions<IPProtocol> {
     var version: IPProtocol.Version {
         get { perProtocolOptions!.version }

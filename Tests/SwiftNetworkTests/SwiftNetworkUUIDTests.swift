@@ -29,7 +29,7 @@ import Glibc
 internal import SwiftNetworkLinuxShim
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class SwiftNetworkUUIDTests: NetTestCase {
 
     func testUUIDCreation() {

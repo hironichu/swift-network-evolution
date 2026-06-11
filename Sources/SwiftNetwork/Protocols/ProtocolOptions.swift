@@ -13,7 +13,7 @@
 //===----------------------------------------------------------------------===//
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public enum ProtocolCompareMode: CustomStringConvertible {
     case equal  // Full equality
     case association  // Should protocol caches and other stored data be shared?
@@ -35,7 +35,7 @@ public enum ProtocolCompareMode: CustomStringConvertible {
 }
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public protocol PerProtocolOptions: Equatable {
     func serialize() -> [UInt8]?
     var serializeInParameters: Bool { get }
@@ -47,7 +47,7 @@ public protocol PerProtocolOptions: Equatable {
 }
 
 @_spi(ProtocolProvider)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public class AbstractProtocolOptions: PerProtocolOptions, Hashable {
     public func isEqual(to: AbstractProtocolOptions, for: ProtocolCompareMode) -> Bool {
         fatalError("Unimplemented")
@@ -212,7 +212,7 @@ public class AbstractProtocolOptions: PerProtocolOptions, Hashable {
 }
 
 @_spi(Essentials)
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 public final class ProtocolOptions<P: NetworkProtocol>: AbstractProtocolOptions {
     public var perProtocolOptions: P.Options? = nil
 

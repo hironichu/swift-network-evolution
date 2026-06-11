@@ -47,7 +47,7 @@ extension CubicLikeProtocol {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 struct Cubic: CongestionControlProtocol, CubicLikeProtocol {
     var log: LogPrefixer
 

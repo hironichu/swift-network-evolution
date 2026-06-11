@@ -22,7 +22,7 @@ import XCTest
 @_spi(Essentials) @_spi(ProtocolProvider) @testable import Network
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class QUICSendStreamStateTests: XCTestCase {
     func testDefaultInitializedState() {
         let state = QUICSendStreamState()
@@ -78,7 +78,7 @@ final class QUICSendStreamStateTests: XCTestCase {
     }
 }
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 final class QUICReceiveStreamStateTests: XCTestCase {
     func testDefaultInitialState() {
         let state = QUICReceiveStreamState()

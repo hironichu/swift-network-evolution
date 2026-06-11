@@ -29,7 +29,7 @@ internal import DriverKitRuntime.Mach.mach_time
 #endif
 #endif
 
-@available(anyAppleOS 26, *)
+@available(Network 0.1.0, *)
 internal struct System {
 
     struct Time {

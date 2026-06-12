@@ -474,7 +474,7 @@ extension CongestionControlProtocol {
     ) {
         congestionEvent(sentTime: largestAckSentTime, mss: mss, qlog: qlog)
         log.debug(
-            "link was flow controlled, reduced congestion window is \(congestionWindow) bytes"
+            "Link was flow controlled, reduced congestion window is \(congestionWindow) bytes"
         )
     }
 

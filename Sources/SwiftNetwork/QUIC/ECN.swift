@@ -151,7 +151,7 @@ struct ECN: ~Copyable, PrefixedLoggable {
             }
             path.ecnState?.resetValidationCounters()
             log.info(
-                "enable ECN echo: \(path.ecnState?.echoEnabled ?? false), enable ECN: \(path.ecnState?.ecnMarkingEnabled ?? false) use ECT(1): \(path.ecnState?.useECT1 ?? false)"
+                "Enable ECN echo: \(path.ecnState?.echoEnabled ?? false), enable ECN: \(path.ecnState?.ecnMarkingEnabled ?? false) use ECT(1): \(path.ecnState?.useECT1 ?? false)"
             )
         }
         for i in 0..<counters.count {
@@ -352,7 +352,7 @@ struct ECNPathState: ~Copyable, PrefixedLoggable {
         }
         guard let ackFrameECNCounter = ackFrame.ecnCounter else {
             log.info(
-                "receiving ACK frame without ECN counts is ok only if newly ACKed packets were not originally sent with ECT"
+                "Receiving ACK frame without ECN counts is ok only if newly ACKed packets were not originally sent with ECT"
             )
             return counters.largestCECount
         }
@@ -403,7 +403,7 @@ struct ECNPathState: ~Copyable, PrefixedLoggable {
             return counters.largestCECount
         } else if ackFrameECNCounter.ce < feedback.ce {
             log.error(
-                "received CE count \(ackFrameECNCounter.ce) < current CE count \(feedback.ce)"
+                "Received CE count \(ackFrameECNCounter.ce) < current CE count \(feedback.ce)"
             )
             return counters.largestCECount
         }

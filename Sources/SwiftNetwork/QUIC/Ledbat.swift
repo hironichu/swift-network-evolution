@@ -132,7 +132,7 @@ struct Ledbat: CongestionControlProtocol, CubicLikeProtocol {
         let baseRTT = rtt.baseRTT
         let currentRTT = rtt.adjustedRTT
         guard currentRTT >= baseRTT else {
-            log.fault("param check returned false")
+            log.fault("currentRTT lower than baseRTT")
             return
         }
         let qDelay = currentRTT - baseRTT
@@ -238,7 +238,7 @@ struct Ledbat: CongestionControlProtocol, CubicLikeProtocol {
     ) {
         if _slowPath(ceCount < ecnCECounter) {
             log.fault(
-                "new CE count \(ceCount) can't be less than current CE count \(ecnCECounter)"
+                "New CE count \(ceCount) can't be less than current CE count \(ecnCECounter)"
             )
         }
         // Update packets acked and marked on every ACK, even if it

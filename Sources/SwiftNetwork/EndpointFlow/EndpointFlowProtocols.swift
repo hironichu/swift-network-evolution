@@ -179,7 +179,6 @@ class EndpointFlowProtocol<LinkageType: InboundDataLinkage>: ProtocolInstanceCon
     }
 
     public func start() {
-        log.debug("start")
         fromExternal {
             lower.invokeConnect(reference)
         }
@@ -197,7 +196,6 @@ class EndpointFlowProtocol<LinkageType: InboundDataLinkage>: ProtocolInstanceCon
     }
 
     public func stop() {
-        log.debug("stop")
         fromExternal {
             lower.invokeDisconnect(reference)
         }

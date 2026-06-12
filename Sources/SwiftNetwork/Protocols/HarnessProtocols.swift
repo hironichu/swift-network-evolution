@@ -926,6 +926,12 @@ public class NewFlowHarness<LinkageType: InboundFlowLinkage, HarnessType: UpperH
             return metadata
         }
     }
+
+    final public func getMetrics(requestedNetworkMetric: RequestedNetworkMetrics) -> NetworkMetrics? {
+        fromExternal {
+            lower.invokeGetMetrics(reference, requestedNetworkMetric: requestedNetworkMetric)
+        }
+    }
 }
 
 @_spi(ProtocolProvider)

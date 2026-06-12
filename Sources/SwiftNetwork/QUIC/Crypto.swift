@@ -508,6 +508,12 @@ extension QUICCrypto: OutboundStreamHandler {
     ) {}
     func getMetadata<P>(_ from: ProtocolInstanceReference) -> ProtocolMetadata<P>?
     where P: NetworkProtocol { nil }
+    func getMetrics(
+        _ from: ProtocolInstanceReference,
+        requestedNetworkMetric: RequestedNetworkMetrics
+    ) -> NetworkMetrics? {
+        nil
+    }
     func levelForReference(_ from: ProtocolInstanceReference) -> SwiftTLSOptions.EncryptionLevel? {
         if from == initialLinkage.reference { return .initial }
         if from == earlyDataLinkage.reference { return .earlyData }

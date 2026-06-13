@@ -1049,6 +1049,8 @@ public struct QUIC: MultiplexProtocol {
     private var alpn: [String]
     private var trustedRawPublicKeyCertificates: [[UInt8]]?
     private var rawPrivateKey: [UInt8]?
+    private var x509CertificateAuthenticator: X509CertificateAuthenticator?
+    private var x509CertificateVerifier: X509CertificateVerifier?
     private var idleTimeout: Int?
     private var maxUDPPayloadSize: Int?
     private var initialMaxData: Int?
@@ -1074,6 +1076,12 @@ public struct QUIC: MultiplexProtocol {
             tlsOptions.trustedRawPublicKeyCertificates = trustedRawPublicKeyCertificates
         }
         if let rawPrivateKey { tlsOptions.rawPrivateKey = rawPrivateKey }
+        if let x509CertificateAuthenticator {
+            tlsOptions.x509CertificateAuthenticator = x509CertificateAuthenticator
+        }
+        if let x509CertificateVerifier {
+            tlsOptions.x509CertificateVerifier = x509CertificateVerifier
+        }
         if let idleTimeout { connectionOptions.idleTimeout = .milliseconds(idleTimeout) }
         if let maxUDPPayloadSize { connectionOptions.maxUDPPayloadSize = UInt16(maxUDPPayloadSize) }
         if let initialMaxData { connectionOptions.initialMaxData = UInt64(initialMaxData) }
@@ -1293,6 +1301,23 @@ public struct QUIC: MultiplexProtocol {
         public func rawPrivateKey(_ key: [UInt8]) -> QUIC {
             var mutableQUIC = self.quic
             mutableQUIC.rawPrivateKey = key
+            return mutableQUIC
+        }
+
+        /// Set a server-side X.509 certificate authenticator for the TLS handshake.
+        ///
+        /// The authenticator provides the DER-encoded certificate chain and signs the TLS transcript
+        /// hash using one of the peer's offered signature algorithms.
+        public func x509CertificateAuthenticator(_ authenticator: X509CertificateAuthenticator) -> QUIC {
+            var mutableQUIC = self.quic
+            mutableQUIC.x509CertificateAuthenticator = authenticator
+            return mutableQUIC
+        }
+
+        /// Set a client-side X.509 certificate verifier for the TLS handshake.
+        public func x509CertificateVerifier(_ verifier: X509CertificateVerifier) -> QUIC {
+            var mutableQUIC = self.quic
+            mutableQUIC.x509CertificateVerifier = verifier
             return mutableQUIC
         }
 

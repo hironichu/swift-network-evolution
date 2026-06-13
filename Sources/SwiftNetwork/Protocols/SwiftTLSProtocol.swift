@@ -49,6 +49,107 @@ internal import SwiftSystem
 public typealias TLSProtocol = SwiftTLSProtocol
 #endif
 
+/// A server-side X.509 certificate authenticator for SwiftTLS-backed connections.
+///
+/// The certificate chain entries are DER-encoded X.509 certificates. The signer is called with the
+/// TLS transcript hash and the peer's offered signature algorithms, and should return a signature
+/// using one of those offered algorithms.
+@_spi(ProtocolProvider)
+@available(Network 0.1.0, *)
+public struct X509CertificateAuthenticator: Sendable {
+    public struct Signature: Sendable, Hashable {
+        public var signature: Data
+        public var algorithm: UInt16
+
+        public init(signature: Data, algorithm: UInt16) {
+            self.signature = signature
+            self.algorithm = algorithm
+        }
+    }
+
+    public var certificateChain: [Data]
+    public var sign: @Sendable (_ transcriptHash: Data, _ offeredSignatureAlgorithms: [UInt16]) -> Signature?
+
+    public init(
+        certificateChain: [Data],
+        sign: @escaping @Sendable (_ transcriptHash: Data, _ offeredSignatureAlgorithms: [UInt16]) -> Signature?
+    ) {
+        self.certificateChain = certificateChain
+        self.sign = sign
+    }
+}
+
+/// A client-side X.509 certificate verifier for SwiftTLS-backed connections.
+///
+/// The verifier receives the DER-encoded peer certificate chain, the TLS CertificateVerify
+/// signature algorithm, signature, and transcript hash. It should return true only when both the
+/// peer certificate chain and CertificateVerify signature are acceptable.
+@_spi(ProtocolProvider)
+@available(Network 0.1.0, *)
+public struct X509CertificateVerifier: Sendable {
+    public struct Verification: Sendable, Hashable {
+        public var certificateChain: [Data]
+        public var signatureAlgorithm: UInt16
+        public var signature: Data
+        public var transcriptHash: Data
+
+        public init(
+            certificateChain: [Data],
+            signatureAlgorithm: UInt16,
+            signature: Data,
+            transcriptHash: Data
+        ) {
+            self.certificateChain = certificateChain
+            self.signatureAlgorithm = signatureAlgorithm
+            self.signature = signature
+            self.transcriptHash = transcriptHash
+        }
+    }
+
+    public var verify: @Sendable (Verification) -> Bool
+
+    public init(verify: @escaping @Sendable (Verification) -> Bool) {
+        self.verify = verify
+    }
+}
+
+#if IMPORT_SWIFTTLS && canImport(SwiftTLS)
+@available(Network 0.1.0, *)
+private func makeAsyncAuthenticator(from authenticator: X509CertificateAuthenticator) -> AsyncAuthenticator {
+    AsyncAuthenticator(
+        supportedCertificateTypes: [.x509],
+        getCertificateChain: { _ in
+            guard !authenticator.certificateChain.isEmpty else {
+                return .unavailable(reason: "empty X.509 certificate chain")
+            }
+            return .available(CertificateList(type: .x509, entries: authenticator.certificateChain))
+        },
+        signTranscriptHash: { info in
+            guard let signature = authenticator.sign(info.transcriptHash, info.peerOffer.signatureAlgorithms) else {
+                return .unavailable(reason: "no supported X.509 certificate signature available")
+            }
+            return .available(signature: signature.signature, algorithm: signature.algorithm)
+        }
+    )
+}
+
+@available(Network 0.1.0, *)
+private func makeAsyncVerifier(from verifier: X509CertificateVerifier) -> AsyncVerifier {
+    AsyncVerifier(availableCertificateTypes: [.x509]) { info in
+        guard info.certificates.type == .x509 else {
+            return .invalid(reason: "unexpected certificate type")
+        }
+        let verification = X509CertificateVerifier.Verification(
+            certificateChain: info.certificates.entries,
+            signatureAlgorithm: info.signatureAlgorithm,
+            signature: info.signature,
+            transcriptHash: info.transcriptHash
+        )
+        return verifier.verify(verification) ? .valid : .invalid(reason: "X.509 certificate verification failed")
+    }
+}
+#endif
+
 protocol SwiftTLSQUICInstance: AnyObject {
     func getLowerLinkage(
         for level: SwiftTLSOptions.EncryptionLevel,
@@ -103,6 +204,8 @@ public struct SwiftTLSProtocol: NetworkProtocol {
 
     public struct SwiftTLSProtocolOptions: PerProtocolOptions {
         var quicInstance: (any SwiftTLSQUICInstance)?
+        private var _x509CertificateAuthenticator: X509CertificateAuthenticator?
+        private var _x509CertificateVerifier: X509CertificateVerifier?
 
         private var _tlsOptions = SwiftTLSOptionsStorage()
 
@@ -110,8 +213,23 @@ public struct SwiftTLSProtocol: NetworkProtocol {
         private typealias SwiftTLSOptionsStorage = SwiftTLSOptions
 
         public var tlsOptions: SwiftTLSOptions {
-            get { _tlsOptions }
-            set { _tlsOptions = newValue }
+            get {
+                var options = _tlsOptions
+                #if IMPORT_SWIFTTLS
+                if let authenticator = _x509CertificateAuthenticator {
+                    options.asyncAuthenticator = makeAsyncAuthenticator(from: authenticator)
+                }
+                if let verifier = _x509CertificateVerifier {
+                    options.asyncVerifier = makeAsyncVerifier(from: verifier)
+                }
+                #endif
+                return options
+            }
+            set {
+                _tlsOptions = newValue
+                _x509CertificateAuthenticator = nil
+                _x509CertificateVerifier = nil
+            }
         }
 
         public mutating func setExternalPSK(identity: [UInt8], epsk: [UInt8]) {
@@ -141,6 +259,14 @@ public struct SwiftTLSProtocol: NetworkProtocol {
                 tlsOptions.enableEarlyData = _tlsOptions.enableEarlyData
                 tlsOptions.clientAuthRequired = _tlsOptions.clientAuthRequired
                 #if IMPORT_SWIFTTLS
+                if let authenticator = _x509CertificateAuthenticator {
+                    tlsOptions.asyncAuthenticator = makeAsyncAuthenticator(from: authenticator)
+                }
+                if let verifier = _x509CertificateVerifier {
+                    tlsOptions.asyncVerifier = makeAsyncVerifier(from: verifier)
+                }
+                #endif
+                #if IMPORT_SWIFTTLS
                 if let externalPSKIdentity = _tlsOptions.externalPSKIdentity,
                     let externalPSKData = _tlsOptions.externalPSKData
                 {
@@ -160,6 +286,8 @@ public struct SwiftTLSProtocol: NetworkProtocol {
                 _tlsOptions.rawPrivateKey = newValue.rawPrivateKey
                 _tlsOptions.enableEarlyData = newValue.enableEarlyData
                 _tlsOptions.clientAuthRequired = newValue.clientAuthRequired
+                _x509CertificateAuthenticator = nil
+                _x509CertificateVerifier = nil
             }
         }
 
@@ -206,6 +334,16 @@ public struct SwiftTLSProtocol: NetworkProtocol {
             set { _tlsOptions.clientAuthRequired = newValue }
         }
 
+        public var x509CertificateAuthenticator: X509CertificateAuthenticator? {
+            get { _x509CertificateAuthenticator }
+            set { _x509CertificateAuthenticator = newValue }
+        }
+
+        public var x509CertificateVerifier: X509CertificateVerifier? {
+            get { _x509CertificateVerifier }
+            set { _x509CertificateVerifier = newValue }
+        }
+
         // Resumed QUIC transport parameter state, set on clients
         public var resumedQUICTransportParameters: [UInt8]?
 
@@ -220,6 +358,8 @@ public struct SwiftTLSProtocol: NetworkProtocol {
             var copy = SwiftTLSProtocolOptions()
             copy.serverName = self.serverName
             copy.tlsOptions = self.tlsOptions
+            copy.x509CertificateAuthenticator = self.x509CertificateAuthenticator
+            copy.x509CertificateVerifier = self.x509CertificateVerifier
             copy.resumedQUICTransportParameters = self.resumedQUICTransportParameters
             // Note: quicInstance is intentionally not copied - it's set by Crypto.start()
             return copy

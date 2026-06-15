@@ -161,7 +161,7 @@ struct StreamSendBuffer: ~Copyable {
         return totalLengthCopied
     }
 
-    var acknowledgedDataRanges = AcknowledgedRanges()
+    var acknowledgedDataRanges = RangeSet<StreamOffset>()
 
     mutating private func acknowledgedSendDataInner(
         offset acknowledgedOffset: StreamOffset,
@@ -204,7 +204,7 @@ struct StreamSendBuffer: ~Copyable {
             }
             // Remove the consumed in one shot
             if consumed > 0 {
-                acknowledgedDataRanges.ranges.removeSubrange(0..<consumed)
+                acknowledgedDataRanges.remove(contentsOf: 0..<UInt64(consumed))
             }
             let difference = newStartOffset - storageStartOffset
             storageStartOffset = newStartOffset
@@ -235,54 +235,6 @@ struct StreamSendBuffer: ~Copyable {
         let allDataAcknowledged = (storage.isEmpty && hasLast)
         log.datapath("All data acknowleged: \(allDataAcknowledged)")
         return allDataAcknowledged
-    }
-}
-
-// Sorted list of ACK byte ranges. Used to track out of order ACKs.
-struct AcknowledgedRanges {
-    var ranges: [Range<StreamOffset>] = []
-
-    var isEmpty: Bool {
-        ranges.isEmpty
-    }
-
-    // Insert a range and merge with any overlapping or adjacent existing ranges.
-    mutating func insert(contentsOf newRange: Range<StreamOffset>) {
-        guard !newRange.isEmpty else { return }
-
-        let lower = newRange.lowerBound
-        let upper = newRange.upperBound
-
-        // startIndex is the first range where upperBound >= lower.
-        var low = 0
-        var high = ranges.count
-        while low < high {
-            let mid = low + (high - low) / 2
-            if ranges[mid].upperBound < lower {
-                low = mid + 1
-            } else {
-                high = mid
-            }
-        }
-        let startIndex = low
-
-        // endIndex is the first range where lowerBound > upper.
-        high = ranges.count
-        while low < high {
-            let mid = low + (high - low) / 2
-            if ranges[mid].lowerBound <= upper {
-                low = mid + 1
-            } else {
-                high = mid
-            }
-        }
-        let endIndex = low
-
-        // Merge the new range with all existing ranges in [startIndex, endIndex) by
-        // taking the minimum lower bound and maximum upper bound across the whole set.
-        let mergedLower = startIndex < endIndex ? min(lower, ranges[startIndex].lowerBound) : lower
-        let mergedUpper = startIndex < endIndex ? max(upper, ranges[endIndex - 1].upperBound) : upper
-        ranges.replaceSubrange(startIndex..<endIndex, with: CollectionOfOne(mergedLower..<mergedUpper))
     }
 }
 

@@ -219,35 +219,9 @@ struct StreamSendBuffer: ~Copyable {
             return
         }
 
-        // Out of order ACK, buffer it and check if the gap is closed.
+        // Out of order ACK. The gap will be consumed when the in-order
+        // path above processes an ACK that fits this range.
         acknowledgedDataRanges.insert(contentsOf: acknowledgedOffset..<totalAcknowledgedOffset)
-
-        guard acknowledgedDataRanges.ranges[0].lowerBound == storageStartOffset else {
-            // We can't increment the storageStartOffset due to a gap. Return.
-            return
-        }
-
-        // The first buffered range is now contiguous with storageStartOffset.
-        // Consume any subsequent ranges that are also contiguous.
-        let oldStartOffset = storageStartOffset
-        var newStartOffset = acknowledgedDataRanges.ranges[0].upperBound
-        var consumed = 1
-        while consumed < acknowledgedDataRanges.ranges.count
-            && acknowledgedDataRanges.ranges[consumed].lowerBound <= newStartOffset
-        {
-            newStartOffset = max(newStartOffset, acknowledgedDataRanges.ranges[consumed].upperBound)
-            consumed += 1
-        }
-        acknowledgedDataRanges.ranges.removeSubrange(0..<consumed)
-
-        storageStartOffset = newStartOffset
-        let difference = newStartOffset - oldStartOffset
-        if !storage.isEmpty {
-            guard storage.claim(fromStart: Int(difference)) else {
-                log.fault("Failed to claim \(difference) bytes from start of stream send buffer storage")
-                return
-            }
-        }
     }
 
     // Returns true if it acknowledged to the end of the data now, i.e. end of stream.
@@ -293,7 +267,6 @@ struct AcknowledgedRanges {
         let startIndex = low
 
         // endIndex is the first range where lowerBound > upper.
-        low = startIndex
         high = ranges.count
         while low < high {
             let mid = low + (high - low) / 2

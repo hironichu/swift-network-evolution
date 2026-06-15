@@ -43,11 +43,13 @@ final class QUICTransfer {
     let NSEC_PER_MSEC = UInt64(Duration.milliseconds(1) / Duration.nanoseconds(1))
     var serverSigningKey = P256.Signing.PrivateKey()
 
-    func run(iterations: Int,
-             loggingHandle: LoggingHandle,
-             group: DispatchGroup,
-             sendSize: Int,
-             linkDelay: NetworkDuration = .zero) -> Double {
+    func run(
+        iterations: Int,
+        loggingHandle: LoggingHandle,
+        group: DispatchGroup,
+        sendSize: Int,
+        linkDelay: NetworkDuration = .zero
+    ) -> Double {
         let ipv4Client = Endpoint(address: IPv4Address(localIPv4Address)!, port: 1234)
         let ipv4Server = Endpoint(address: IPv4Address(remoteIPv4Address)!, port: 2345)
         var clientStream: StreamUpperHarness? = nil

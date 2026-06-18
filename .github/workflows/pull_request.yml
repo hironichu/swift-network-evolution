@@ -38,7 +38,7 @@ jobs:
       enable_windows_checks: false
       enable_android_sdk_build: false
       enable_embedded_wasm_sdk_build: false
-      enable_linux_static_sdk_build: false
+      enable_linux_static_sdk_build: true
   soundness:
     name: Soundness
     uses: swiftlang/github-workflows/.github/workflows/soundness.yml@main

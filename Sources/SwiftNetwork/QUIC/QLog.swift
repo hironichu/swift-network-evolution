@@ -117,6 +117,7 @@ protocol EventProtocol {
     func dumpData() -> [String: Any]
 }
 
+@available(Network 0.1.0, *)
 struct StreamEvent: EventProtocol {
     let streamID: QUICStreamID
     let streamType: QUICStreamType
@@ -135,6 +136,7 @@ struct StreamEvent: EventProtocol {
     }
 }
 
+@available(Network 0.1.0, *)
 struct StreamTypeSetEvent: EventProtocol {
     let streamID: QUICStreamID
     let owner: QLogOwner?
@@ -151,6 +153,7 @@ struct StreamTypeSetEvent: EventProtocol {
     }
 }
 
+@available(Network 0.1.0, *)
 struct EventParametersSet: EventProtocol {
     let owner: QLogOwner?
     let resumptionAllowed: Bool?
@@ -207,6 +210,7 @@ struct EventParametersSet: EventProtocol {
     }
 }
 
+@available(Network 0.1.0, *)
 struct EventPacket {
     let packetType: PacketType
     let packetHeader: PacketHeader
@@ -219,6 +223,7 @@ struct EventPacket {
     let trigger: Trigger
 }
 
+@available(Network 0.1.0, *)
 struct PacketHeader {
     let packetNumber: PacketNumber
     let packetSize: UInt64
@@ -267,6 +272,7 @@ struct PacketHeader {
     }
 }
 
+@available(Network 0.1.0, *)
 enum Event {
     case parametersSet(EventParametersSet, timestamp: NetworkDuration)
     case packetSent(EventPacket, timestamp: NetworkDuration)
@@ -360,6 +366,7 @@ enum Event {
     }
 }
 
+@available(Network 0.1.0, *)
 struct EventFrame {
     var frame: QUICShorthandFrame
     init(frame: QUICShorthandFrame) {
@@ -468,6 +475,7 @@ struct EventFrame {
     }
 }
 
+@available(Network 0.1.0, *)
 struct EventFrames {
     var frames: [EventFrame] = []
 
@@ -497,6 +505,7 @@ enum PacketType: String {
     case retry = "retry"
     case versionNegotiation = "version_negotiation"
 
+    @available(Network 0.1.0, *)
     init(packet: borrowing SentPacketRecord) {
         switch packet.identifier.space {
         case .initial:
@@ -508,6 +517,7 @@ enum PacketType: String {
         }
     }
 
+    @available(Network 0.1.0, *)
     init(packet: borrowing Packet) {
         if packet.versionNegotiation {
             self = .versionNegotiation
@@ -527,6 +537,7 @@ enum PacketType: String {
     }
 }
 
+@available(Network 0.1.0, *)
 struct EventMetrics: EventProtocol {
     let minRTT: NetworkDuration
     let smoothedRTT: NetworkDuration
@@ -569,6 +580,7 @@ struct EventCongestionStateUpdated: EventProtocol {
     }
 }
 
+@available(Network 0.1.0, *)
 final class QLog {
     private var eventsList: [Event]
     private var topLevelObject: [String: Any]

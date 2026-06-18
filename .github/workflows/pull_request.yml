@@ -35,7 +35,7 @@ jobs:
         /usr/bin/xcodebuild -quiet -scheme swift-network-evolution-Package -destination "generic/platform=visionos" build && visionos=PASSED || { rc=1; visionos=FAILED; };
         echo "=== visionOS build: $visionos ===";
         echo "=== xcrun swift test ===";
-        xcrun swift test "$@" && tests=PASSED || { rc=1; tests=FAILED; };
+        xcrun swift test --quiet "$@" && tests=PASSED || { rc=1; tests=FAILED; };
         echo "=== swift test: $tests ===";
         echo "=== Summary ===";
         printf "%-20s %s\n" "macOS build:" "$macos";
@@ -53,15 +53,21 @@ jobs:
         bash -c '
         set -e;
         echo "=== Build (default traits) ===";
-        swift build --build-tests "$@";
+        swift build --build-tests --quiet "$@";
+        echo "=== Build (default traits): PASSED ===";
         echo "=== Build (additive traits on) ===";
-        swift build --build-tests --traits DatapathLogging,QlogOutput,SignpostOutput "$@";
+        swift build --build-tests --quiet --traits DatapathLogging,QlogOutput,SignpostOutput "$@";
+        echo "=== Build (additive traits on): PASSED ===";
         echo "=== Build (reductive traits on) ===";
-        swift build --build-tests --traits DisableDebugLogging,DisableErrorLogging "$@";
+        swift build --build-tests --quiet --traits DisableDebugLogging,DisableErrorLogging "$@";
+        echo "=== Build (reductive traits on): PASSED ===";
         echo "=== Test (debug) ===";
-        swift test "$@";
+        swift test --quiet "$@";
+        echo "=== Test (debug): PASSED ===";
         echo "=== Test (release) ===";
-        swift test -c release "$@"
+        swift test --quiet -c release "$@";
+        echo "=== Test (release): PASSED ===";
+        echo "=== Summary: all builds and tests passed ==="
         ' bash
       enable_windows_checks: false
       enable_android_sdk_build: false

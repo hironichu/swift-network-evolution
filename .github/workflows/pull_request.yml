@@ -34,7 +34,20 @@ jobs:
         ' bash
       enable_linux_checks: true
       linux_swift_versions: '["nightly-main", "nightly-6.3", "6.3"]'
-      linux_build_command: "swift test -c release"
+      linux_build_command: >-
+        bash -c '
+        set -e;
+        echo "=== Build (default traits) ===";
+        swift build --build-tests "$@";
+        echo "=== Build (additive traits on) ===";
+        swift build --build-tests --traits DatapathLogging,QlogOutput,SignpostOutput "$@";
+        echo "=== Build (reductive traits on) ===";
+        swift build --build-tests --traits DisableDebugLogging,DisableErrorLogging "$@";
+        echo "=== Test (debug) ===";
+        swift test "$@";
+        echo "=== Test (release) ===";
+        swift test -c release "$@"
+        ' bash
       enable_windows_checks: false
       enable_android_sdk_build: false
       enable_embedded_wasm_sdk_build: false

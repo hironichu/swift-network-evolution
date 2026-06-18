@@ -13,6 +13,25 @@ jobs:
       swift_nightly_flags: "--build-system native -Xswiftc -warnings-as-errors"  # workaround nightly-main issue
       enable_macos_checks: true
       macos_exclude_xcode_versions: "[{\"xcode_version\": \"16.4\"}, {\"xcode_version\": \"26.3\"}]"
+      macos_build_command: >-
+        bash -c '
+        rc=0;
+        echo "=== xcodebuild macOS ===";
+        /usr/bin/xcodebuild -quiet -scheme swift-network-evolution-Package -destination "generic/platform=macos,variant=macos" build || rc=1;
+        echo "=== xcodebuild Mac Catalyst ===";
+        /usr/bin/xcodebuild -quiet -scheme swift-network-evolution-Package -destination "generic/platform=macos,variant=Mac Catalyst" build || rc=1;
+        echo "=== xcodebuild iOS ===";
+        /usr/bin/xcodebuild -quiet -scheme swift-network-evolution-Package -destination "generic/platform=ios" build || rc=1;
+        echo "=== xcodebuild watchOS ===";
+        /usr/bin/xcodebuild -quiet -scheme swift-network-evolution-Package -destination "generic/platform=watchos" build || rc=1;
+        echo "=== xcodebuild tvOS ===";
+        /usr/bin/xcodebuild -quiet -scheme swift-network-evolution-Package -destination "generic/platform=tvos" build || rc=1;
+        echo "=== xcodebuild visionOS ===";
+        /usr/bin/xcodebuild -quiet -scheme swift-network-evolution-Package -destination "generic/platform=visionos" build || rc=1;
+        echo "=== xcrun swift test ===";
+        xcrun swift test "$@" || rc=1;
+        exit $rc
+        ' bash
       enable_linux_checks: true
       linux_swift_versions: '["nightly-main", "nightly-6.3", "6.3"]'
       linux_build_command: "swift test -c release"

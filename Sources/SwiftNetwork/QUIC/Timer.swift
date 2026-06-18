@@ -78,7 +78,20 @@ final class Timer: PrefixedLoggable {
     #else
     private let extraDebugging = false
     #endif
-    private(set) var nextDeadline: NetworkClock.Instant = .zero
+    var nextDeadline: NetworkClock.Instant {
+        switch wakeup {
+        case .armed(let instant):
+            return instant
+        case .idle:
+            return .zero
+        }
+    }
+    private var wakeup: KernelWakeup = .idle
+
+    private enum KernelWakeup {
+        case idle
+        case armed(NetworkClock.Instant)
+    }
 
     static let timerThreshold = NetworkDuration.milliseconds(1)
 
@@ -126,6 +139,7 @@ final class Timer: PrefixedLoggable {
         if !timerCancelled {
             log.debug("Stopping timer")
             timerCancelled = true
+            wakeup = .idle
             reference?.unscheduleWakeup()
         }
         if final {
@@ -180,8 +194,10 @@ final class Timer: PrefixedLoggable {
         }
 
         // If the timer is over one millisecond in the future,
-        // check if it is redundant with the existing deadline (nextDeadline)
-        if nextDeadline != .zero, delta > Timer.timerThreshold {
+        // check if it is redundant with the existing deadline (nextDeadline).
+        // This optimisation is only valid if there's a pending wakeup, otherwise
+        // the timer may never fire.
+        if case .armed(let nextDeadline) = wakeup, delta > Timer.timerThreshold {
             let deadlineDifference = earliestDeadline.duration(to: nextDeadline)
             if deadlineDifference < Timer.timerThreshold && deadlineDifference > (Timer.timerThreshold * -1) {
                 // Timer is already set to within a millisecond of where it needs to be, don't schedule it
@@ -192,7 +208,7 @@ final class Timer: PrefixedLoggable {
 
         timerCancelled = false
         let oldDeadline = nextDeadline
-        nextDeadline = now + delta
+        wakeup = .armed(now + delta)
         log.datapath(
             "arming timer for the next \(delta) (now \(now)), new deadline \(nextDeadline) old deadline \(oldDeadline)"
         )
@@ -234,6 +250,9 @@ final class Timer: PrefixedLoggable {
     }
 
     public func timerFired(timeNow: NetworkClock.Instant = .now) {
+        // Timer fired means the kernel woke us up.
+        wakeup = .idle
+
         if _slowPath(timerCancelled) {
             log.fault("Timer fired after it was cancelled")
             return

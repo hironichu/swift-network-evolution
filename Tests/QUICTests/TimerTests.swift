@@ -179,6 +179,82 @@ final class TimerTests: XCTestCase {
     func testAbsoluteNow() {
         XCTAssertGreaterThan(System.Time.nowAbsoluteNanoseconds(), 0)
     }
+
+    func testSpuriousFireRearmsRemainingTimer() {
+        let timer = QUICTimer(logPrefixer: timerTestsLogPrefixer)
+        let semaphore = DispatchSemaphore(value: 0)
+
+        // A, in 2s
+        let idA = timer.insert(description: "A", fromNow: .seconds(2), timerNow: .zero) {
+            XCTFail("A was disabled and must not fire")
+        }
+        XCTAssertEqual(timer.nextDeadline, .init(.seconds(2)))
+
+        // B, 999us after A (crucially, just before the 1ms coalescing threshold)
+        let idB = timer.insert(
+            description: "B",
+            fromNow: .seconds(2) + .microseconds(999),
+            timerNow: .zero
+        ) {
+            semaphore.signal()
+        }
+        // A was earlier, deadline is unchanged
+        XCTAssertEqual(timer.nextDeadline, .init(.seconds(2)))
+
+        // Disable A. B is now the earliest *enabled* entry but the scheduled
+        // time should remain at 2s (as B was within the threshold of A).
+        timer.reschedule(identifier: idA, fromNow: .zero, timerNow: .zero)
+        XCTAssertEqual(timer.nextDeadline, .init(.seconds(2)))
+
+        // Simulate a wakeup which is 0.5ms early. With the 1ms leeway,
+        // post-leeway 'now' = 2s + 500us, which is still before B's
+        // deadline (2s + 999us), so B doesn't fire and the spurious path runs.
+        timer.timerFired(timeNow: .init(.seconds(2) - .microseconds(500)))
+
+        // timerFired needs to rearm the wakeup.
+        XCTAssertEqual(timer.nextDeadline, .init(.seconds(2) + .microseconds(999)))
+
+        // Make sure B fires.
+        timer.timerFired(timeNow: .init(.seconds(2) + .microseconds(999)))
+        XCTAssertEqual(
+            semaphore.wait(timeout: DispatchTime.now() + .seconds(1)),
+            DispatchTimeoutResult.success
+        )
+
+        timer.remove(idA)
+        timer.remove(idB)
+    }
+
+    func testCancellationFollowedByCloseInsertRearmsTimer() {
+        let timer = QUICTimer(logPrefixer: timerTestsLogPrefixer)
+        let semaphore = DispatchSemaphore(value: 0)
+
+        let idA = timer.insert(description: "A", fromNow: .seconds(2), timerNow: .zero) {
+            XCTFail("A was cancelled and must not fire")
+        }
+        XCTAssertEqual(timer.nextDeadline, .init(.seconds(2)))
+
+        // Cancel A; disarm the wakeup.
+        timer.reschedule(identifier: idA, fromNow: .zero, timerNow: .zero)
+
+        // Schedule a new timer.
+        let idB = timer.insert(
+            description: "B",
+            fromNow: .seconds(2) + .microseconds(500),
+            timerNow: .zero
+        ) {
+            semaphore.signal()
+        }
+        XCTAssertEqual(timer.nextDeadline, .init(.seconds(2) + .microseconds(500)))
+        timer.timerFired(timeNow: .init(.seconds(2) + .microseconds(500)))
+        XCTAssertEqual(
+            semaphore.wait(timeout: DispatchTime.now() + .seconds(1)),
+            DispatchTimeoutResult.success
+        )
+
+        timer.remove(idA)
+        timer.remove(idB)
+    }
 }
 
 #endif

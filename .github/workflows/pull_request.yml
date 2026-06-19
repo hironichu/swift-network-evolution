@@ -7,7 +7,7 @@ on:
 jobs:
   tests:
     name: Test
-    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@0.0.9
+    uses: swiftlang/github-workflows/.github/workflows/swift_package_test.yml@0.0.11
     with:
       swift_flags: "-Xswiftc -warnings-as-errors"
       swift_nightly_flags: "--build-system native -Xswiftc -warnings-as-errors"  # workaround nightly-main issue
@@ -19,7 +19,7 @@ jobs:
       enable_windows_checks: false
       enable_android_sdk_build: false
       enable_embedded_wasm_sdk_build: false
-      enable_linux_static_sdk_build: false
+      enable_linux_static_sdk_build: true
   soundness:
     name: Soundness
     uses: swiftlang/github-workflows/.github/workflows/soundness.yml@main

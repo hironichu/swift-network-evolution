@@ -15,6 +15,9 @@
 #if canImport(Glibc)
 import Glibc
 internal import Logging
+#elseif canImport(Musl)
+import Musl
+internal import Logging
 #elseif canImport(os)
 internal import os
 #endif

@@ -16,6 +16,10 @@
 import Glibc
 internal import Logging
 internal import SwiftNetworkLinuxShim
+#elseif canImport(Musl)
+import Musl
+internal import Logging
+internal import SwiftNetworkLinuxShim
 #elseif canImport(os)
 internal import os
 #endif

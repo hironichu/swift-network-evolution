@@ -12,8 +12,14 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if os(Linux) && canImport(Glibc) && NETLINK_ENABLED
+#if os(Linux) && NETLINK_ENABLED
+
+#if canImport(Glibc)
 import Glibc
+#elseif canImport(Musl)
+import Musl
+#endif
+
 internal import Logging
 internal import SwiftNetworkLinuxShim
 

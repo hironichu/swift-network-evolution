@@ -86,9 +86,9 @@ final class Timer: PrefixedLoggable {
             return .zero
         }
     }
-    private var wakeup: KernelWakeup = .idle
+    private var wakeup: WakeupState = .idle
 
-    private enum KernelWakeup {
+    private enum WakeupState {
         case idle
         case armed(NetworkClock.Instant)
     }

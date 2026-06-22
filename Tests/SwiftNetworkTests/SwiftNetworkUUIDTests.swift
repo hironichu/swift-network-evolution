@@ -24,8 +24,11 @@ import XCTest
 import Foundation
 #endif
 
-#if os(Linux)
+#if canImport(Glibc)
 import Glibc
+internal import SwiftNetworkLinuxShim
+#elseif canImport(Musl)
+import Musl
 internal import SwiftNetworkLinuxShim
 #endif
 

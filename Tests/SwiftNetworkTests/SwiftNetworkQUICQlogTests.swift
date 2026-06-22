@@ -32,7 +32,6 @@ import XCTest
 
 #if os(Linux)
 import Crypto
-import Glibc
 #else
 import CryptoKit
 #endif

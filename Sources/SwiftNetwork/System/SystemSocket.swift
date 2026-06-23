@@ -15,6 +15,9 @@
 #if canImport(Glibc)
 import Glibc
 internal import Logging
+#elseif canImport(Musl)
+import Musl
+internal import Logging
 #elseif canImport(os)
 internal import os
 #endif
@@ -28,19 +31,19 @@ enum SocketType: CUnsignedInt, Sendable {
     var socketType: Int32 {
         switch self {
         case .stream:
-            #if os(Linux)
+            #if os(Linux) && canImport(Glibc)
             return CInt(SOCK_STREAM.rawValue)
             #else
             return SOCK_STREAM
             #endif
         case .datagram:
-            #if os(Linux)
+            #if os(Linux) && canImport(Glibc)
             return CInt(SOCK_DGRAM.rawValue)
             #else
             return SOCK_DGRAM
             #endif
         case .raw:
-            #if os(Linux)
+            #if os(Linux) && canImport(Glibc)
             return CInt(SOCK_RAW.rawValue)
             #else
             return SOCK_RAW
@@ -275,8 +278,10 @@ extension IPAddress {
                 }
             } else if addressFamily == .ipv6, let v6Address = self as? IPv6Address {
                 var sockaddr6 = sockaddr_in6()
-                #if os(Linux)
+                #if canImport(Glibc)
                 sockaddr6.sin6_addr.__in6_u.__u6_addr32 = v6Address.address
+                #elseif canImport(Musl)
+                sockaddr6.sin6_addr.__in6_union.__s6_addr32 = v6Address.address
                 #elseif canImport(Darwin)
                 sockaddr6.sin6_len = UInt8(MemoryLayout<sockaddr_in6>.size)
                 sockaddr6.sin6_addr.__u6_addr.__u6_addr32 = v6Address.address

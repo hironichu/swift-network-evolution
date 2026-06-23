@@ -12,8 +12,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if os(Linux)
+#if canImport(Glibc)
 import Glibc
+#elseif canImport(Musl)
+import Musl
 #elseif !NETWORK_STANDALONE
 import Darwin
 #endif

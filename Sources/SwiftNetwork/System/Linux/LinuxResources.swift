@@ -13,7 +13,11 @@
 //===----------------------------------------------------------------------===//
 
 #if os(Linux)
+#if canImport(Glibc)
 import Glibc
+#elseif canImport(Musl)
+import Musl
+#endif
 internal import SwiftNetworkLinuxShim
 
 /// A set of Linux system APIs for interacting with the system resources.

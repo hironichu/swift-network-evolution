@@ -18,7 +18,9 @@
 #ifdef __linux__
 
 #include <stdio.h>
-#ifdef NETLINK_ENABLED
+// We cannot just use "ifdef NETLINK_ENABLED" because
+// flags from Package.swift don't get propagated here.
+#if __has_include(<linux/netlink.h>)
     #include <linux/netlink.h>
     #include <linux/rtnetlink.h>
 #endif

@@ -54,7 +54,7 @@ packageDependencies = [
     .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     .package(url: "https://github.com/apple/swift-collections.git", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-crypto.git", from: "5.0.0-beta.1"),
-    .package(url: "https://github.com/apple/swift-tls.git", branch: "main"),
+    .package(url: "https://github.com/hironichu/swift-tls.git", branch: "feature/secp256r1-key-exchange"),
 ]
 targetDependencies = [
     .product(name: "Logging", package: "swift-log"),
@@ -69,7 +69,7 @@ targetDependencies = [
 packageDependencies = [
     .package(url: "https://github.com/apple/swift-collections.git", from: "1.5.0"),
     .package(url: "https://github.com/apple/swift-crypto.git", from: "5.0.0-beta.1"),
-    .package(url: "https://github.com/apple/swift-tls.git", branch: "main"),
+    .package(url: "https://github.com/hironichu/swift-tls.git", branch: "feature/secp256r1-key-exchange"),
 ]
 targetDependencies = [
     .product(name: "DequeModule", package: "swift-collections"),

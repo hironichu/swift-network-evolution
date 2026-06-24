@@ -88,6 +88,8 @@ final class EndpointFlow: CustomDebugStringConvertible {
     var writeRequests = NetworkUniqueDeque<WriteRequest>()
     var readRequests = [ReadRequest]()
     var stateUpdateHandler: ((State) -> Void)? = nil
+    var cancelRequested = false
+    var teardownComplete = false
     let reuse: Bool
     var _state: State
     var state: State {
@@ -308,39 +310,119 @@ final class EndpointFlow: CustomDebugStringConvertible {
         }
     }
 
-    func cancel() {
+    /// Cancel the flow.
+    func cancel(force: Bool = false, error: NetworkError? = nil) {
         self.parameters.context.async {
-            switch self.flowProtocol {
-            case .stream(let flow):
+            guard !self.cancelRequested || force else {
+                return
+            }
+            self.cancelRequested = true
+            Logger.connection.debug("EndpointFlow: \(self.debugDescription) cancel called (force=\(force))")
+
+            // 1. Stop the current flow.
+            // Graceful close of a flow defers teardown until
+            // the `disconnected` event arrives.
+            let teardownDeferred = self.stopFlow(force: force, error: error)
+
+            // 2. Fail anything still queued; it can no longer complete
+            self.failPendingRequests()
+
+            // 3. Detach and mark cancelled (now, or from the disconnected
+            // callback for the deferred graceful path).
+            if !teardownDeferred {
+                self.completeTeardown()
+            }
+        }
+    }
+
+    /// Stop the current flow. Returns `true` if teardown has been
+    /// deferred to the `disconnected` callback (graceful close of a live QUIC
+    /// connection), `false` if the caller should tear down immediately.
+    /// `error` is only used on the force path.
+    private func stopFlow(force: Bool, error: NetworkError?) -> Bool {
+        switch self.flowProtocol {
+        case .stream(let flow):
+            if force {
+                flow.abort(error: error)
+                return false
+            }
+            Logger.connection.debug("EndpointFlow: \(self.debugDescription) stopping stream flow protocol")
+            if self.shouldDeferTeardown {
+                // Wait for the lower layer to confirm `disconnected` before
+                // detaching so buffered data drains cleanly.
+                flow.waitForDisconnected { [self] _ in
+                    Logger.connection.debug(
+                        "EndpointFlow: \(self.debugDescription) disconnected event received, tearing down"
+                    )
+                    self.completeTeardown()
+                }
                 flow.stop()
-                flow.teardown()
-            case .datagram(let flow):
+                return true
+            }
+            flow.stop()
+            return false
+        case .datagram(let flow):
+            Logger.connection.debug("EndpointFlow: \(self.debugDescription) stopping datagram flow protocol")
+            if force {
+                flow.abort(error: error)
+            } else {
                 flow.stop()
-                flow.teardown()
-            case .none:
-                break
             }
+            return false
+        case .none:
+            Logger.connection.debug("EndpointFlow: \(self.debugDescription) no flow protocol to stop")
+            return false
+        }
+    }
 
-            // Fail pending write requests
-            while var writeRequest = self.writeRequests.popFirst() {
-                let completion = writeRequest.completion
-                writeRequest.frame.finalize(success: false)
-                WriteRequest.runCompletion(completion, success: false)
-            }
+    /// Whether graceful teardown should wait for the QUIC `disconnected` event.
+    /// Only true when there is still a live QUIC connection to drain and the
+    /// lower layer has not already delivered `disconnected`.
+    private var shouldDeferTeardown: Bool {
+        #if !NETWORK_NO_SWIFT_QUIC
+        guard self.quicConnectionReference != nil else { return false }
+        if case .failed = self.state { return false }
+        return true
+        #else
+        return false
+        #endif
+    }
 
-            // Fail pending read requests
-            while !self.readRequests.isEmpty {
-                let readRequest = self.readRequests.removeFirst()
-                readRequest.complete(content: nil, isComplete: false, isFinal: true, error: .posix(ECANCELED))
-            }
+    /// Fail and finalize any pending write and read requests.
+    private func failPendingRequests() {
+        while var writeRequest = self.writeRequests.popFirst() {
+            let completion = writeRequest.completion
+            writeRequest.frame.finalize(success: false)
+            WriteRequest.runCompletion(completion, success: false)
+        }
+        while !self.readRequests.isEmpty {
+            let readRequest = self.readRequests.removeFirst()
+            readRequest.complete(content: nil, isComplete: false, isFinal: true, error: .posix(ECANCELED))
+        }
+    }
 
-            self.state = .cancelled
-
-            var stateUpdateHandler = self.stateUpdateHandler
-            self.stateUpdateHandler = nil
-            if stateUpdateHandler != nil {
-                stateUpdateHandler = nil
-            }
+    /// Detach the flow, release references, transition to `.cancelled`, and drop the state-update handler.
+    private func completeTeardown() {
+        guard !self.teardownComplete else { return }
+        self.teardownComplete = true
+        switch self.flowProtocol {
+        case .stream(let flow):
+            flow.teardown()
+        case .datagram(let flow):
+            flow.teardown()
+        case .none:
+            break
+        }
+        self.flowProtocol = nil
+        #if !NETWORK_NO_SWIFT_QUIC
+        self.quicConnectionReference = nil
+        #endif
+        self.state = .cancelled
+        Logger.connection.debug("EndpointFlow: \(self.debugDescription) state set to cancelled")
+        var stateUpdateHandler = self.stateUpdateHandler
+        self.stateUpdateHandler = nil
+        if stateUpdateHandler != nil {
+            stateUpdateHandler = nil
         }
     }
 }

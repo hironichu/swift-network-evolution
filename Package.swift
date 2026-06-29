@@ -125,7 +125,7 @@ let package = Package(
             dependencies: [
                 "SwiftNetwork",
                 .product(name: "SwiftTLS", package: "swift-tls"),
-                .product(name: "Crypto", package: "swift-crypto", condition: .when(platforms: [.linux])),
+                .product(name: "Crypto", package: "swift-crypto"),
                 .product(name: "Logging", package: "swift-log", condition: .when(platforms: [.linux])),
             ],
             swiftSettings: availabilityMacros + settings

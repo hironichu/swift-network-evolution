@@ -121,7 +121,8 @@ let package = Package(
             name: "SignpostOutput",
             description: "Enables `OSSignposter` output from the QUIC implementation."
         ),
-        .default(enabledTraits: []),
+        //.default(enabledTraits: []),
+        .default(enabledTraits: ["DisableDebugLogging", "DisableErrorLogging"]),
     ],
     dependencies: packageDependencies,
     targets: [

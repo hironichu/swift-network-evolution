@@ -58,16 +58,7 @@ public struct FrameArray: ~Copyable {
     }
 
     public mutating func prepend(frame: consuming Frame) {
-        var newArray = FrameArray(capacity: self.count + 1)
-        newArray.add(frame: frame)
-        if !self.frames.isEmpty {
-            while !self.frames.isEmpty {
-                if let first = self.frames.popFirst() {
-                    newArray.add(frame: first)
-                }
-            }
-        }
-        self = newArray
+        self.frames.prepend(frame)
     }
 
     public var count: Int {

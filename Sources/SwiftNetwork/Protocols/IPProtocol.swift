@@ -339,9 +339,9 @@ public struct IPProtocol: NetworkProtocol {
         var log = NetworkLoggerState()
         var eventManager = ProtocolEventManager()
 
-        static let IP_MF: UInt16 = 0x2000
-        static let IP_OFFMASK: UInt16 = 0x1FFF
-        static let IP_MAX_FRAGMENT_COUNT: Int = 32
+        static let IPMoreFragmentsFlag: UInt16 = 0x2000
+        static let IPFragmentOffsetMask: UInt16 = 0x1FFF
+        static let IPMaxFragmentCount: Int = 32
 
         // Only called by newProtocolInstance()
         fileprivate static func registerNewIP(on context: NetworkContext) -> ProtocolInstanceReference {
@@ -493,7 +493,7 @@ public struct IPProtocol: NetworkProtocol {
                         return false
                     }
                     // Fragment offset is in 8 byte increments
-                    let fragmentByteOffset = (offset & IP_OFFMASK) * 8
+                    let fragmentByteOffset = (offset & IPFragmentOffsetMask) * 8
                     guard fragmentByteOffset == expectedOffset else {
                         complete = false
                         return false
@@ -507,7 +507,7 @@ public struct IPProtocol: NetworkProtocol {
                     }
                     // Found the next fragment
                     expectedOffset = next
-                    if offset & IP_MF == 0 {
+                    if offset & IPMoreFragmentsFlag == 0 {
                         // No more fragments, we're complete
                         complete = true
                         return false
@@ -834,15 +834,15 @@ public struct IPProtocol: NetworkProtocol {
                         reassemblyState = IPReassemblyState(reassemblyID: identifier)
                     }
                     let currentFragmentCount = reassemblyState?.inputReassemblyFrames.count ?? 0
-                    guard currentFragmentCount < IP_MAX_FRAGMENT_COUNT else {
+                    guard currentFragmentCount < IPMaxFragmentCount else {
                         frame.finalize(success: false)
                         continue
                     }
 
-                    let fragmentByteOffset = (offset & IP_OFFMASK) * 8
+                    let fragmentByteOffset = (offset & IPFragmentOffsetMask) * 8
                     if fragmentByteOffset == 0 {
                         reassemblyState?.inputReassemblyFrames.prepend(frame: frame)
-                    } else if offset & IP_MF == 0 {
+                    } else if offset & IPMoreFragmentsFlag == 0 {
                         reassemblyState?.inputReassemblyFrames.add(frame: frame)
                     } else {
                         var sorted = FrameArray()
@@ -863,7 +863,7 @@ public struct IPProtocol: NetworkProtocol {
                                     sorted.add(frame: existing)
                                     continue
                                 }
-                                existingOffset = existingOffset & IP_OFFMASK
+                                existingOffset = existingOffset & IPFragmentOffsetMask
                                 let existingByteOffset = existingOffset * 8
                                 let predecessorEnd =
                                     UInt32(existingByteOffset) + UInt32(existingLength)

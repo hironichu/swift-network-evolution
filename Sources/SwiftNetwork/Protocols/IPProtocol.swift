@@ -748,7 +748,7 @@ public struct IPProtocol: NetworkProtocol {
                     }
 
                     // IP fragment detected, set hadFragments for future reassembly processing
-                    if offset & UInt16(IP_MF | IP_OFFMASK) != 0 {
+                    if offset & UInt16(IPMoreFragmentsFlag | IPFragmentOffsetMask) != 0 {
                         if frame.isSingleIPAggregate {
                             log.fault("Received fragment on a super-packet with length: \(originalFrameLength)")
                             return .removeFrameAndContinue

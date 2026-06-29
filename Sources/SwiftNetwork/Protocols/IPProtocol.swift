@@ -473,6 +473,8 @@ public struct IPProtocol: NetworkProtocol {
                 }
                 var complete = false
                 var expectedOffset: UInt16 = 0
+                var tos: UInt8 = 0
+                var ttl: UInt8 = 0
                 reassemblyState?.inputReassemblyFrames.iterateMutableFrames { frame in
                     guard frame.bufferLength >= IPv4Instance.headerLength else {
                         log.info("Reassembly frame is no longer valid")
@@ -483,10 +485,11 @@ public struct IPProtocol: NetworkProtocol {
                     var length: UInt16 = 0
                     let result = Deserializer.deserialize(&frame, claim: false) { read throws(DeserializationError) in
                         try read.skip(1)
-                        try read.skip(1)
+                        try read.uint8(&tos)
                         try read.uint16NetworkByteOrder(&length)
                         try read.skip(2)
                         try read.uint16NetworkByteOrder(&offset)
+                        try read.uint8(&ttl)
                     }
                     guard result.isValid else {
                         complete = false
@@ -613,7 +616,15 @@ public struct IPProtocol: NetworkProtocol {
 
                 log.debug("Reassembly complete for IP ID \(reassemblyID), total length \(newIPFrameLength)")
 
+                let dscpValue = tos >> 2  // IPTOS_DSCP_SHIFT
+                newFrame.dscpValue = dscpValue
+                if self.flags.receiveHopLimit {
+                    newFrame.hopLimit = ttl
+                }
                 newFrame.metadataComplete = true
+                if self.flags.calculateReceiveTime {
+                    newFrame.timestamp = Frame.FrameTimestamp.receiveTime(.now)
+                }
                 reassembled.add(frame: newFrame)
 
                 // Finalize the original fragment frames
@@ -1322,7 +1333,7 @@ public struct IPProtocol: NetworkProtocol {
         }
 
         mutating func sendDatagrams(_ datagrams: consuming FrameArray) throws(NetworkError) {
-            IPInstance.processSend(&self.instanceType, datagrams: &datagrams)
+            IPInstance.processOutbound(&self.instanceType, datagrams: &datagrams)
             try invokeSendDatagrams(datagrams)
         }
 
@@ -1343,7 +1354,7 @@ public struct IPProtocol: NetworkProtocol {
         }
 
         @inline(__always)
-        private static func processSend(_ instanceType: inout IPInstanceType, datagrams: inout FrameArray) {
+        private static func processOutbound(_ instanceType: inout IPInstanceType, datagrams: inout FrameArray) {
             switch instanceType {
             case .ipv4(var instance):
                 instance.writeOutboundFrames(&datagrams)

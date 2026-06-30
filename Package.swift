@@ -34,58 +34,27 @@ let availabilityMacros: [SwiftSetting] = versionNumbers.flatMap { version in
     }
 }
 
-var packageDependencies = [PackageDescription.Package.Dependency]()
-var targetDependencies = [PackageDescription.Target.Dependency]()
+let allApplePlatforms: [Platform] = [
+    .driverKit, .iOS, .macCatalyst, .macOS, .tvOS, .visionOS, .watchOS,
+]
 
 // Logging levels, qlog output, and QUIC signposts are configured via package
 // traits. See the `traits:` list on the `Package(...)` initializer below.
-var settings: [SwiftSetting] = [
+let settings: [SwiftSetting] = [
     .define("IMPORT_SWIFTTLS"),
     .define("EXPORT_SWIFTTLS"),
     .define("IMPORT_CRYPTO"),
     .define("SWIFTTLS_CERTIFICATE_VERIFICATION"),
+    // To support back to macOS 26, provide a shim on top of crypto APIs
+    // that allows passing spans. This is a less performant path, so for
+    // performance-sensitive cases, remove this define and require at least
+    // macOS 27.
+    .define("SHIM_CRYPTO_SPAN_APIS", .when(platforms: allApplePlatforms)),
     .unsafeFlags(["-Xfrontend", "-experimental-spi-only-imports"]),
     .enableExperimentalFeature("Lifetimes"),
     .enableExperimentalFeature("AnyAppleOSAvailability"),
     .enableUpcomingFeature("ExistentialAny"),
 ]
-
-#if os(Linux)
-packageDependencies = [
-    .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
-    .package(url: "https://github.com/apple/swift-collections.git", from: "1.5.0"),
-    .package(url: "https://github.com/apple/swift-crypto.git", from: "5.0.0-beta.1"),
-    .package(url: "https://github.com/apple/swift-tls.git", branch: "main"),
-]
-targetDependencies = [
-    .product(name: "Logging", package: "swift-log"),
-    .target(name: "SwiftNetworkLinuxShim", condition: .when(platforms: [.linux])),
-    .product(name: "DequeModule", package: "swift-collections"),
-    .product(name: "BasicContainers", package: "swift-collections"),
-    .product(name: "Crypto", package: "swift-crypto"),
-    .product(name: "CryptoExtras", package: "swift-crypto"),
-    .product(name: "SwiftTLS", package: "swift-tls"),
-]
-#else
-packageDependencies = [
-    .package(url: "https://github.com/apple/swift-collections.git", from: "1.5.0"),
-    .package(url: "https://github.com/apple/swift-crypto.git", from: "5.0.0-beta.1"),
-    .package(url: "https://github.com/apple/swift-tls.git", branch: "main"),
-]
-targetDependencies = [
-    .product(name: "DequeModule", package: "swift-collections"),
-    .product(name: "BasicContainers", package: "swift-collections"),
-    .product(name: "Crypto", package: "swift-crypto"),
-    .product(name: "CryptoExtras", package: "swift-crypto"),
-    .product(name: "SwiftTLS", package: "swift-tls"),
-]
-
-// To support back to macOS 26, provide a shim on top of crypto APIs
-// that allows passing spans. This is a less performant path, so for
-// performance-sensitive cases, remove this define and require at least
-// macOS 27.
-settings.append(.define("SHIM_CRYPTO_SPAN_APIS"))
-#endif
 
 let package = Package(
     name: "swift-network-evolution",
@@ -123,11 +92,24 @@ let package = Package(
         ),
         .default(enabledTraits: []),
     ],
-    dependencies: packageDependencies,
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
+        .package(url: "https://github.com/apple/swift-collections.git", from: "1.5.0"),
+        .package(url: "https://github.com/apple/swift-crypto.git", from: "5.0.0-beta.1"),
+        .package(url: "https://github.com/apple/swift-tls.git", branch: "main"),
+    ],
     targets: [
         .target(
             name: "SwiftNetwork",
-            dependencies: targetDependencies,
+            dependencies: [
+                .product(name: "Logging", package: "swift-log", condition: .when(platforms: [.linux])),
+                .target(name: "SwiftNetworkLinuxShim", condition: .when(platforms: [.linux])),
+                .product(name: "DequeModule", package: "swift-collections"),
+                .product(name: "BasicContainers", package: "swift-collections"),
+                .product(name: "Crypto", package: "swift-crypto"),
+                .product(name: "CryptoExtras", package: "swift-crypto"),
+                .product(name: "SwiftTLS", package: "swift-tls"),
+            ],
             swiftSettings: availabilityMacros + settings
         ),
         .target(
@@ -140,7 +122,12 @@ let package = Package(
         ),
         .target(
             name: "SwiftNetworkBenchmarks",
-            dependencies: targetDependencies + ["SwiftNetwork"],
+            dependencies: [
+                "SwiftNetwork",
+                .product(name: "SwiftTLS", package: "swift-tls"),
+                .product(name: "Crypto", package: "swift-crypto"),
+                .product(name: "Logging", package: "swift-log", condition: .when(platforms: [.linux])),
+            ],
             swiftSettings: availabilityMacros + settings
         ),
         .testTarget(

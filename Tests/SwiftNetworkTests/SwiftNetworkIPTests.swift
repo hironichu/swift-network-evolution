@@ -501,7 +501,7 @@ final class SwiftNetworkIPTests: NetTestCase {
             SwiftNetworkIPTests.threeFragmentInputPacket2,
             SwiftNetworkIPTests.threeFragmentInputPacket3,
         ])
-        XCTAssertNotNil(readBytes, "Failed to receive reassembled IPv4 packet from two fragments")
+        XCTAssertNotNil(readBytes, "Failed to receive reassembled IPv4 packet from three fragments")
         if let readBytes {
             XCTAssertEqual(
                 readBytes,

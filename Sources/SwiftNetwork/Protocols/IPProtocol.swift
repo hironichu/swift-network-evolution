@@ -841,9 +841,6 @@ public struct IPProtocol: NetworkProtocol {
                     }
 
                     processReassembly(log, ipID: identifier, reassembled: &reassembledFragments, forceFlush: false)
-                    if reassemblyState == nil {
-                        reassemblyState = IPReassemblyState(reassemblyID: identifier)
-                    }
                     let currentFragmentCount = reassemblyState?.inputReassemblyFrames.count ?? 0
                     guard currentFragmentCount < IPMaxFragmentCount else {
                         frame.finalize(success: false)
@@ -1305,11 +1302,13 @@ public struct IPProtocol: NetworkProtocol {
                 while var fragment = instance.reassemblyState?.inputReassemblyFrames.popFirst() {
                     fragment.finalize(success: false)
                 }
+                instance.reassemblyState = nil
                 instanceType = .ipv4(instance)
             case .ipv6(var instance):
                 while var fragment = instance.reassemblyState?.inputReassemblyFrames.popFirst() {
                     fragment.finalize(success: false)
                 }
+                instance.reassemblyState = nil
                 instanceType = .ipv6(instance)
             }
         }

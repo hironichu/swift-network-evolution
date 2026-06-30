@@ -655,4 +655,13 @@ final class SwiftNetworkFrameArrayTests: NetTestCase {
         drained.finalizeAllFramesAsFailed()
         array.finalizeAllFramesAsFailed()
     }
+
+    func testPrepend() {
+        var array = FrameArray(frame: Frame(copyBuffer: [1, 2, 3]))
+        array.prepend(frame: Frame(copyBuffer: [4, 5, 6]))
+        XCTAssertEqual(array.count, 2)
+        XCTAssertEqual(array.unclaimedLength, 6)
+        XCTAssertEqual(collectBytes(array), [4, 5, 6, 1, 2, 3])
+        array.finalizeAllFramesAsFailed()
+    }
 }

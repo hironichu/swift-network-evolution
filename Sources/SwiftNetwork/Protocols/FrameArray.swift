@@ -57,6 +57,10 @@ public struct FrameArray: ~Copyable {
         }
     }
 
+    public mutating func prepend(frame: consuming Frame) {
+        self.frames.prepend(frame)
+    }
+
     public var count: Int {
         frames.count
     }

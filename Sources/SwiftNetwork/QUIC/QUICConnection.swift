@@ -6154,10 +6154,12 @@ extension QUICConnection {
             return false
         }
 
+        // RFC 9000 §19.16:
+        //
         // Receipt of a RETIRE_CONNECTION_ID frame containing a sequence number
-        // greater than any previously sent to the peer MAY be treated as a
+        // greater than any previously sent to the peer MUST be treated as a
         // connection error of type PROTOCOL_VIOLATION.
-        guard frame.sequence < largestSentLocalCIDSequenceNumber else {
+        if frame.sequence > largestSentLocalCIDSequenceNumber {
             log.error(
                 "Received RETIRE_CONNECTION_ID with sequence number greater than what we have ever sent in a NEW_CONNECTION_ID"
             )

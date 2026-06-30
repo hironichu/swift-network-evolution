@@ -107,7 +107,7 @@ final class SwiftNetworkIPTests: NetTestCase {
     static let outputMessage: [UInt8] = [0xfc, 0xf7, 0x04, 0xd2, 0x00, 0x0d, 0xe8, 0x04, 0x68, 0x65, 0x6c, 0x6c, 0x6f]
     static let inputMessage: [UInt8] = [0x04, 0xd2, 0xfc, 0xf7, 0x00, 0x0d, 0xe8, 0x04, 0x68, 0x65, 0x6c, 0x6c, 0x6f]
 
-    // 169.254.225.163 -> 169.254.156.146, fragment 1 of 2: first 8 bytes of inputMessage, MF=1 (More fragments)
+    // 169.254.225.163 -> 169.254.156.146 (for simulation only), fragment 1 of 2: first 8 bytes of inputMessage, MF=1 (More fragments)
     // The first 8 bytes of inputMessage are the UDP header
     // reassemblyID = 0xABCD
     static let twoFragmentInputPacket1: [UInt8] = [
@@ -115,7 +115,7 @@ final class SwiftNetworkIPTests: NetTestCase {
         0xA9, 0xFE, 0xE1, 0xA3, 0xA9, 0xFE, 0x9C, 0x92,
         0x04, 0xD2, 0xFC, 0xF7, 0x00, 0x0D, 0xE8, 0x04,
     ]
-    // 169.254.225.163 -> 169.254.156.146, fragment 2 of 2: last 5 bytes of inputMessage, MF=0 (Last fragment)
+    // 169.254.225.163 -> 169.254.156.146 (for simulation only), fragment 2 of 2: last 5 bytes of inputMessage, MF=0 (Last fragment)
     // The next 5 bytes of inputMessage are the UDP payload (hello)
     // reassemblyID = 0xABCD
     static let twoFragmentInputPacket2: [UInt8] = [
@@ -124,7 +124,92 @@ final class SwiftNetworkIPTests: NetTestCase {
         0x68, 0x65, 0x6C, 0x6C, 0x6F,
     ]
 
-    // 169.254.225.163 -> 169.254.156.146, fragment 1 of 3: bytes 0–7, MF=1, offset=0 (More fragments)
+    // 169.254.225.163 -> 169.254.156.146 (for simulation only), fragment 1 of 2: bytes 0–7, MF=1 (More fragments)
+    // Fragment 2 uses offset=2 (byte offset 16), skipping offset=1 (byte offset 8).
+    // This creates a gap so appendReassembledPackets detects expectedOffset mismatch and drops the sequence.
+    // reassemblyID = 0xDEAD
+    static let gappedFragmentInputPacket1: [UInt8] = [
+        0x45, 0x00, 0x00, 0x1C, 0xDE, 0xAD, 0x20, 0x00, 0x40, 0x11, 0x00, 0x00,
+        0xA9, 0xFE, 0xE1, 0xA3, 0xA9, 0xFE, 0x9C, 0x92,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+    ]
+    // Fragment at offset=2 (byte offset=16), MF=0 (Last fragment). Skips offset=1 (byte offset=8) entirely.
+    // reassemblyID = 0xDEAD
+    static let gappedFragmentInputPacket2: [UInt8] = [
+        0x45, 0x00, 0x00, 0x1C, 0xDE, 0xAD, 0x00, 0x02, 0x40, 0x11, 0x00, 0x00,
+        0xA9, 0xFE, 0xE1, 0xA3, 0xA9, 0xFE, 0x9C, 0x92,
+        0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
+    ]
+
+    // Two fragments, both with MF=1 set (More fragments)
+    // reassemblyID = 0xF00D
+    static let noTerminalFragmentPacket1: [UInt8] = [
+        0x45, 0x00, 0x00, 0x1C, 0xF0, 0x0D, 0x20, 0x00, 0x40, 0x11, 0x00, 0x00,
+        0xA9, 0xFE, 0xE1, 0xA3, 0xA9, 0xFE, 0x9C, 0x92,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+    ]
+    // Fragment at offset=1 (byte 8), also MF=1 (More fragments)
+    // reassemblyID = 0xF00D
+    static let noTerminalFragmentPacket2: [UInt8] = [
+        0x45, 0x00, 0x00, 0x1C, 0xF0, 0x0D, 0x20, 0x01, 0x40, 0x11, 0x00, 0x00,
+        0xA9, 0xFE, 0xE1, 0xA3, 0xA9, 0xFE, 0x9C, 0x92,
+        0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
+    ]
+
+    // Two fragments whose combined payload totals 65516 bytes, making rawLength (20 + 65516 = 65536) exceed UInt16.max.
+    // reassemblyID = 0xCAFE
+    static let overflowFragmentPacket1: [UInt8] = {
+        var packet = [UInt8](repeating: 0, count: 32772)
+        packet[0] = 0x45
+        packet[1] = 0x00
+        packet[2] = 0x80
+        packet[3] = 0x04
+        packet[4] = 0xCA
+        packet[5] = 0xFE
+        packet[6] = 0x20
+        packet[7] = 0x00
+        packet[8] = 0x40
+        packet[9] = 0x11
+        packet[10] = 0x00
+        packet[11] = 0x00
+        packet[12] = 0xA9
+        packet[13] = 0xFE
+        packet[14] = 0xE1
+        packet[15] = 0xA3
+        packet[16] = 0xA9
+        packet[17] = 0xFE
+        packet[18] = 0x9C
+        packet[19] = 0x92
+        return packet
+    }()
+
+    // reassemblyID = 0xCAFE
+    static let overflowFragmentPacket2: [UInt8] = {
+        var packet = [UInt8](repeating: 0, count: 32784)
+        packet[0] = 0x45
+        packet[1] = 0x00
+        packet[2] = 0x80
+        packet[3] = 0x10
+        packet[4] = 0xCA
+        packet[5] = 0xFE
+        packet[6] = 0x0F
+        packet[7] = 0xFE
+        packet[8] = 0x40
+        packet[9] = 0x11
+        packet[10] = 0x00
+        packet[11] = 0x00
+        packet[12] = 0xA9
+        packet[13] = 0xFE
+        packet[14] = 0xE1
+        packet[15] = 0xA3
+        packet[16] = 0xA9
+        packet[17] = 0xFE
+        packet[18] = 0x9C
+        packet[19] = 0x92
+        return packet
+    }()
+
+    // 169.254.225.163 -> 169.254.156.146 (for simulation only), fragment 1 of 3: bytes 0–7, MF=1, offset=0 (More fragments)
     // reassemblyID = 0xBEEF
     static let threeFragmentInputPacket1: [UInt8] = [
         0x45, 0x00, 0x00, 0x1C, 0xBE, 0xEF, 0x20, 0x00, 0x40, 0x11, 0x00, 0x00,
@@ -410,86 +495,77 @@ final class SwiftNetworkIPTests: NetTestCase {
         )
     }
 
-    func testTwoIPv4FragmentsToReassemble() {
-        let parameters = Parameters()
-        let expectation = XCTestExpectation(description: "Two reassembled packets expectation")
-        let context = parameters.context
-        context.async {
-            defer { expectation.fulfill() }
-            let path = PathProperties(parameters: parameters)
-            let ipInstance = IPProtocol.instance(context: parameters.context)
-            let ipOptions = IPProtocol.options()
-            ipOptions.setLogID(prefix: "C", parent: "1", protocolLogIDNumber: 2)
-            ipOptions.setProtocolInstance(ipInstance)
-            parameters.defaultStack.internet = .ip(ipOptions)
-
-            let udpOptions = UDPProtocol.options()
-            udpOptions.noMetadata = true
-            udpOptions.setLogID(prefix: "C", parent: "1", protocolLogIDNumber: 1)
-            parameters.defaultStack.transport = .udp(udpOptions)
-
-            let localEndpoint = Endpoint(address: IPv4Address(SwiftNetworkIPTests.localIPv4Address)!, port: 0)
-            let remoteEndpoint = Endpoint(address: IPv4Address(SwiftNetworkIPTests.remoteIPv4Address)!, port: 0)
-
-            let ipLinkage = OutboundDatagramLinkage(reference: ipInstance)
-            let upperHarness = DatagramUpperHarness(
-                identifier: "Client",
-                local: localEndpoint,
-                remote: remoteEndpoint,
-                parameters: parameters,
-                path: path,
-                context: parameters.context,
-                lowerProtocol: ipLinkage
+    func testThreeAIPv4FragmentsToReassemble() {
+        let readBytes = processIPv4Fragment(packets: [
+            SwiftNetworkIPTests.threeFragmentInputPacket1,
+            SwiftNetworkIPTests.threeFragmentInputPacket2,
+            SwiftNetworkIPTests.threeFragmentInputPacket3,
+        ])
+        XCTAssertNotNil(readBytes, "Failed to receive reassembled IPv4 packet from two fragments")
+        if let readBytes {
+            XCTAssertEqual(
+                readBytes,
+                SwiftNetworkIPTests.threeFragmentPayload,
+                "Reassembled payload did not match expected"
             )
-            XCTAssertNotNil(upperHarness, "Failed to attach IP to upper harness")
-            guard let upperHarness else { return }
-
-            let lowerHarness = DatagramLowerHarness(identifier: "Client", context: parameters.context)
-            do {
-                try ipInstance.attachLowerDatagramProtocol(
-                    lowerHarness.reference,
-                    remote: remoteEndpoint,
-                    local: localEndpoint,
-                    parameters: parameters,
-                    path: path
-                )
-            } catch {
-                XCTAssertTrue(false, "Failed to attach IP to lower harness")
-            }
-
-            upperHarness.start { connected in
-                XCTAssertTrue(connected, "IP failed to become connected")
-            }
-            // Deliver both fragments in a single batch.
-            lowerHarness.setNextInboundPacket(SwiftNetworkIPTests.twoFragmentInputPacket1, sendAvailableEvent: false)
-            lowerHarness.setNextInboundPacket(SwiftNetworkIPTests.twoFragmentInputPacket2)
-
-            let readBytes = upperHarness.read()
-            XCTAssertNotNil(readBytes, "Failed to receive reassembled IPv4 packet from two fragments")
-            if let readBytes {
-                XCTAssertEqual(
-                    readBytes,
-                    SwiftNetworkIPTests.inputMessage,
-                    "Reassembled payload did not match expected"
-                )
-            }
-            upperHarness.stop()
-            upperHarness.teardown()
         }
-        wait(for: [expectation], timeout: 5.0)
     }
 
-    func testThreeIPv4FragmentsToReassemble() {
-        // This test will also test the sorted fragment logic
+    func testTwoIPv4FragmentsToReassemble() {
+        let readBytes = processIPv4Fragment(packets: [
+            SwiftNetworkIPTests.twoFragmentInputPacket1,
+            SwiftNetworkIPTests.twoFragmentInputPacket2,
+        ])
+        XCTAssertNotNil(readBytes, "Failed to receive reassembled IPv4 packet from two fragments")
+        if let readBytes {
+            XCTAssertEqual(readBytes, SwiftNetworkIPTests.inputMessage, "Reassembled payload did not match expected")
+        }
+    }
+
+    // Verifies that appendReassembledPackets discards a fragment when it detects an offset gap.
+    // fragment 1 has byte offset 0, fragment 2 jumps to byte offset 16, skipping 8.
+    func testGappedIPv4FragmentsProduceNoReassembledFrame() {
+        let readBytes = processIPv4Fragment(packets: [
+            SwiftNetworkIPTests.gappedFragmentInputPacket1,
+            SwiftNetworkIPTests.gappedFragmentInputPacket2,
+        ])
+        XCTAssertNil(readBytes, "Unexpectedly received a packet from a gapped fragment sequence")
+    }
+
+    // Verifies that appendReassembledPackets does not create a reassembled fragment without a terminal MF=0 flag.
+    func testAllMFSetFragmentsProduceNoReassembledFrame() {
+        let readBytes = processIPv4Fragment(packets: [
+            SwiftNetworkIPTests.noTerminalFragmentPacket1,
+            SwiftNetworkIPTests.noTerminalFragmentPacket2,
+        ])
+        XCTAssertNil(readBytes, "Unexpectedly received a packet when no terminal fragment was present")
+    }
+
+    // Verifies that appendReassembledPackets rejects a complete fragment sequence whose combined
+    // payload would cause rawLength (headerLength + totalPayload) exceeds UInt16.max.
+    func testReassembledLengthOverflowProducesNoFrame() {
+        let readBytes = processIPv4Fragment(packets: [
+            SwiftNetworkIPTests.overflowFragmentPacket1,
+            SwiftNetworkIPTests.overflowFragmentPacket2,
+        ])
+        XCTAssertNil(readBytes, "Unexpectedly received a packet when reassembled length overflows UInt16")
+    }
+
+    // Sets up a minimal IPv4 harness to test different fragment and reassembly conditions.
+    private func processIPv4Fragment(
+        packets: [[UInt8]],
+        logIDNumber: Int = 2
+    ) -> [UInt8]? {
         let parameters = Parameters()
-        let expectation = XCTestExpectation(description: "Three reassembled packets expectation")
+        var result: [UInt8]? = nil
+        let expectation = XCTestExpectation()
         let context = parameters.context
         context.async {
             defer { expectation.fulfill() }
             let path = PathProperties(parameters: parameters)
             let ipInstance = IPProtocol.instance(context: parameters.context)
             let ipOptions = IPProtocol.options()
-            ipOptions.setLogID(prefix: "C", parent: "1", protocolLogIDNumber: 2)
+            ipOptions.setLogID(prefix: "C", parent: "1", protocolLogIDNumber: logIDNumber)
             ipOptions.setProtocolInstance(ipInstance)
             parameters.defaultStack.internet = .ip(ipOptions)
 
@@ -502,17 +578,20 @@ final class SwiftNetworkIPTests: NetTestCase {
             let remoteEndpoint = Endpoint(address: IPv4Address(SwiftNetworkIPTests.remoteIPv4Address)!, port: 0)
 
             let ipLinkage = OutboundDatagramLinkage(reference: ipInstance)
-            let upperHarness = DatagramUpperHarness(
-                identifier: "Client",
-                local: localEndpoint,
-                remote: remoteEndpoint,
-                parameters: parameters,
-                path: path,
-                context: parameters.context,
-                lowerProtocol: ipLinkage
-            )
-            XCTAssertNotNil(upperHarness, "Failed to attach IP to upper harness")
-            guard let upperHarness else { return }
+            guard
+                let upperHarness = DatagramUpperHarness(
+                    identifier: "Client",
+                    local: localEndpoint,
+                    remote: remoteEndpoint,
+                    parameters: parameters,
+                    path: path,
+                    context: parameters.context,
+                    lowerProtocol: ipLinkage
+                )
+            else {
+                XCTFail("Failed to attach IP to upper harness")
+                return
+            }
 
             let lowerHarness = DatagramLowerHarness(identifier: "Client", context: parameters.context)
             do {
@@ -524,31 +603,25 @@ final class SwiftNetworkIPTests: NetTestCase {
                     path: path
                 )
             } catch {
-                XCTAssertTrue(false, "Failed to attach IP to lower harness")
+                XCTFail("Failed to attach IP to lower harness")
+                return
             }
 
             upperHarness.start { connected in
-                XCTAssertTrue(connected, "IP failed to become connected")
-            }
-            // Deliver all three fragments in a single batch.
-            lowerHarness.setNextInboundPacket(SwiftNetworkIPTests.threeFragmentInputPacket1, sendAvailableEvent: false)
-            lowerHarness.setNextInboundPacket(SwiftNetworkIPTests.threeFragmentInputPacket2, sendAvailableEvent: false)
-            lowerHarness.setNextInboundPacket(SwiftNetworkIPTests.threeFragmentInputPacket3)
-
-            let readBytes = upperHarness.read()
-            XCTAssertNotNil(readBytes, "Failed to receive reassembled IPv4 packet from three fragments")
-            if let readBytes {
-                XCTAssertEqual(
-                    readBytes,
-                    SwiftNetworkIPTests.threeFragmentPayload,
-                    "Reassembled payload did not match expected"
-                )
+                XCTAssertTrue(connected)
             }
 
+            for (index, packet) in packets.enumerated() {
+                let isLast = index == packets.count - 1
+                lowerHarness.setNextInboundPacket(packet, sendAvailableEvent: isLast)
+            }
+
+            result = upperHarness.read()
             upperHarness.stop()
             upperHarness.teardown()
         }
         wait(for: [expectation], timeout: 5.0)
+        return result
     }
 
     func ipEcho(clientEndpoint: Endpoint, serverEndpoint: Endpoint, messages: [[UInt8]]) {

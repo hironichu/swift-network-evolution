@@ -1293,6 +1293,27 @@ public struct IPProtocol: NetworkProtocol {
             }
         }
 
+        mutating func teardown() {
+            IPInstance.drainReassemblyQueue(&instanceType)
+        }
+
+        @inline(__always)
+        private static func drainReassemblyQueue(_ instanceType: inout IPInstanceType) {
+            // Make sure that there are no left over frames stranded in the reassembly queue
+            switch instanceType {
+            case .ipv4(var instance):
+                while var fragment = instance.reassemblyState?.inputReassemblyFrames.popFirst() {
+                    fragment.finalize(success: false)
+                }
+                instanceType = .ipv4(instance)
+            case .ipv6(var instance):
+                while var fragment = instance.reassemblyState?.inputReassemblyFrames.popFirst() {
+                    fragment.finalize(success: false)
+                }
+                instanceType = .ipv6(instance)
+            }
+        }
+
         mutating func receiveDatagrams(maximumDatagramCount: Int) throws(NetworkError) -> FrameArray? {
             repeat {
                 let inboundFrames = try invokeReceiveDatagrams(maximumDatagramCount: maximumDatagramCount)

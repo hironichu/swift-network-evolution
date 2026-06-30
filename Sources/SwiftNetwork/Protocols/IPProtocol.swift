@@ -525,7 +525,7 @@ public struct IPProtocol: NetworkProtocol {
                 // Guard against the max value of UInt16
                 let rawLength = UInt32(IPv4Instance.headerLength) + UInt32(expectedOffset)
                 guard rawLength <= UInt16.max else {
-                    log.fault("Reassembled IP length overflows for IP ID \(reassemblyID)")
+                    log.error("Reassembled IP length overflows for IP ID \(reassemblyID)")
                     return
                 }
                 let newIPFrameLength = UInt16(rawLength)
@@ -536,7 +536,7 @@ public struct IPProtocol: NetworkProtocol {
                     first.copyInto(&newFrame, length: IPv4Instance.headerLength)
                 }
                 guard headerCopied == IPv4Instance.headerLength else {
-                    log.fault("Failed to copy IP header from first fragment (IP ID \(reassemblyID))")
+                    log.error("Failed to copy IP header from first fragment (IP ID \(reassemblyID))")
                     newFrame.finalize(success: false)
                     return
                 }
@@ -547,12 +547,12 @@ public struct IPProtocol: NetworkProtocol {
                     try write.uint16NetworkByteOrder(0)
                 }
                 guard result.isValid else {
-                    log.fault("Failed to write the updated IP header")
+                    log.error("Failed to write the updated IP header")
                     newFrame.finalize(success: false)
                     return
                 }
                 guard newFrame.claim(fromStart: IPv4Instance.headerLength) else {
-                    log.fault("Failed to claim the updated IP header")
+                    log.error("Failed to claim the updated IP header")
                     newFrame.finalize(success: false)
                     return
                 }
@@ -561,7 +561,7 @@ public struct IPProtocol: NetworkProtocol {
                 var copyFailed = false
                 reassemblyState?.inputReassemblyFrames.iterateMutableFrames { fragment in
                     guard fragment.bufferLength >= IPv4Instance.headerLength else {
-                        log.fault("Fragment became invalid during reassembly copy")
+                        log.error("Fragment became invalid during reassembly copy")
                         copyFailed = true
                         return false
                     }
@@ -580,7 +580,7 @@ public struct IPProtocol: NetworkProtocol {
                         return false
                     }
                     guard fragment.bufferLength >= Int(ipLength) else {
-                        log.fault(
+                        log.error(
                             "Fragment buffer \(fragment.bufferLength) < ip_len \(ipLength) for IP ID \(reassemblyID)"
                         )
                         copyFailed = true
@@ -590,7 +590,7 @@ public struct IPProtocol: NetworkProtocol {
                     let payloadLength = totalIPLength - IPv4Instance.headerLength
                     let payloadEnd = writeOffset + payloadLength
                     guard payloadEnd <= Int(newIPFrameLength) - IPv4Instance.headerLength else {
-                        log.fault("Writing fragment payload overflows the new IP frame")
+                        log.error("Writing fragment payload overflows the new IP frame")
                         copyFailed = true
                         return false
                     }
@@ -601,7 +601,7 @@ public struct IPProtocol: NetworkProtocol {
                         length: payloadLength
                     )
                     guard copied == payloadLength else {
-                        log.fault("Payload copy mismatch for IP ID \(reassemblyID): \(copied) != \(payloadLength)")
+                        log.error("Payload copy mismatch for IP ID \(reassemblyID): \(copied) != \(payloadLength)")
                         copyFailed = true
                         return false
                     }

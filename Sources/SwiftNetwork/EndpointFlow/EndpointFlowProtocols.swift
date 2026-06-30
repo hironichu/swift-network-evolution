@@ -184,6 +184,7 @@ class EndpointFlowProtocol<LinkageType: InboundDataLinkage>: ProtocolInstanceCon
     }
 
     public func start() {
+        log.debug("Starting flow")
         fromExternal {
             lower.invokeConnect(reference)
         }
@@ -201,12 +202,14 @@ class EndpointFlowProtocol<LinkageType: InboundDataLinkage>: ProtocolInstanceCon
     }
 
     public func stop() {
+        log.debug("Stopping flow")
         fromExternal {
             lower.invokeDisconnect(reference)
         }
     }
 
     public func teardown() {
+        log.debug("Tearing down flow")
         fromExternal {
             do throws(NetworkError) {
                 try lower.invokeDetach(reference)
@@ -214,6 +217,13 @@ class EndpointFlowProtocol<LinkageType: InboundDataLinkage>: ProtocolInstanceCon
             } catch {
                 log.error("Failed to detach lower protocol: \(error)")
             }
+        }
+    }
+
+    public func abort(error: NetworkError? = nil) {
+        log.debug("Aborting flow")
+        fromExternal {
+            lower.invokeDisconnect(reference, error: error)
         }
     }
 
@@ -411,6 +421,19 @@ final class StreamEndpointFlowProtocol: EndpointFlowProtocol<InboundStreamLinkag
             parameters: parameters,
             path: path
         )
+    }
+
+    override public func abort(error: NetworkError? = nil) {
+        log.debug("Aborting flow")
+        fromExternal {
+            do throws(NetworkError) {
+                try lower.invokeAbortOutbound(reference, error: error)
+                try lower.invokeAbortInbound(reference, error: error)
+            } catch {
+                log.error("Failed to abort stream: \(error)")
+            }
+            lower.invokeDisconnect(reference, error: error)
+        }
     }
 
     func attachLowerStreamProtocol(

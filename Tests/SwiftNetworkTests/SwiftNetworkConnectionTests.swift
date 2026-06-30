@@ -189,8 +189,17 @@ final class SwiftNetworkConnectionTests: NetTestCase {
             DispatchTimeoutResult.success
         )
 
+        let cancelGroup = DispatchGroup()
+        cancelGroup.enter()
+        cancelGroup.enter()
+        client.onStateUpdate { _, state in if case .cancelled = state { cancelGroup.leave() } }
+        server.onStateUpdate { _, state in if case .cancelled = state { cancelGroup.leave() } }
         client.cancel()
         server.cancel()
+        XCTAssertEqual(
+            cancelGroup.wait(timeout: DispatchTime.now() + .seconds(5)),
+            DispatchTimeoutResult.success
+        )
     }
 
     func testQUICDatapathCopy() {
@@ -284,8 +293,17 @@ final class SwiftNetworkConnectionTests: NetTestCase {
             DispatchTimeoutResult.success
         )
 
+        let cancelGroup = DispatchGroup()
+        cancelGroup.enter()
+        cancelGroup.enter()
+        client.onStateUpdate { _, state in if case .cancelled = state { cancelGroup.leave() } }
+        server.onStateUpdate { _, state in if case .cancelled = state { cancelGroup.leave() } }
         client.cancel()
         server.cancel()
+        XCTAssertEqual(
+            cancelGroup.wait(timeout: DispatchTime.now() + .seconds(5)),
+            DispatchTimeoutResult.success
+        )
     }
 
     class TestWrappedBuffer {
@@ -392,8 +410,17 @@ final class SwiftNetworkConnectionTests: NetTestCase {
             DispatchTimeoutResult.success
         )
 
+        let cancelGroup = DispatchGroup()
+        cancelGroup.enter()
+        cancelGroup.enter()
+        client.onStateUpdate { _, state in if case .cancelled = state { cancelGroup.leave() } }
+        server.onStateUpdate { _, state in if case .cancelled = state { cancelGroup.leave() } }
         client.cancel()
         server.cancel()
+        XCTAssertEqual(
+            cancelGroup.wait(timeout: DispatchTime.now() + .seconds(5)),
+            DispatchTimeoutResult.success
+        )
     }
 
     #endif

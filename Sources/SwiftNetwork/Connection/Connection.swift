@@ -1819,6 +1819,12 @@ public class NetworkChannel<ApplicationProtocol: NetworkProtocolOptions>: Networ
         endpointFlow.cancel()
     }
 
+    /// A variant of `cancel()` that performs a non-graceful closure of the transport
+    /// `error`, if provided, is signalled to the peer
+    public func forceCancel(error: NetworkError? = nil) {
+        endpointFlow.cancel(force: true, error: error)
+    }
+
     deinit {
         cancel()
     }
@@ -2031,6 +2037,11 @@ extension QUIC {
                 lockedState.stateUpdateHandler
             }) {
                 handler(self, state)
+            }
+            // Forward the primary stream's state changes to the parent connection so a
+            // connection-level `onStateUpdate` still sees the state changes.
+            if self.endpointFlow === parent.endpointFlow {
+                parent.onStateChange(state)
             }
         }
     }

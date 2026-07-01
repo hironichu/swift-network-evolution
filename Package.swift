@@ -90,8 +90,7 @@ let package = Package(
             name: "SignpostOutput",
             description: "Enables `OSSignposter` output from the QUIC implementation."
         ),
-        //.default(enabledTraits: []),
-        .default(enabledTraits: ["DisableDebugLogging", "DisableErrorLogging"]),
+        .default(enabledTraits: []),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
